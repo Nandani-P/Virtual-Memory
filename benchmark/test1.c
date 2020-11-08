@@ -11,6 +11,7 @@ int main() {
     void *a = myalloc(100*4);
     int old_a = (int)a;
     int x = 1;
+    int y;
     int address_a = 0;
    
     printf("Addresses of the allocation: %x\n", (int)a);
@@ -21,8 +22,8 @@ int main() {
             
     printf("Fetching matrix elements stored in the arrays\n");
 
-        GetVal((void *)address_a, &x, sizeof(int));
-        printf("%d ", x);
+        GetVal((void *)address_a, &y, sizeof(int));
+        printf("%d ", y);
         printf("\n");
     
 
