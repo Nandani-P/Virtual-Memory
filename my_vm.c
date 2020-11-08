@@ -120,7 +120,9 @@ void *myalloc(unsigned int num_bytes) {
 
     //HINT: If the physical memory is not yet initialized, then allocate and initialize.
     if (initializePhysicalFlag == false)
+    {
         SetPhysicalMem();
+    }
 
    /* HINT: If the page directory is not initialized, then initialize the
    page directory. Next, using get_next_avail(), check if there are free pages. If
@@ -137,7 +139,7 @@ void myfree(void *va, int size) {
     //Free the page table entries starting from this virtual address (va)
     // Also mark the pages free in the bitmap
     //Only free if the memory from "va" to va+size is valid
-    free(va);
+    free(va, size);
 }
 
 

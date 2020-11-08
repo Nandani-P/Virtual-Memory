@@ -21,11 +21,10 @@ int main() {
             
     printf("Fetching matrix elements stored in the arrays\n");
 
-            GetVal((void *)address_a, &x, sizeof(int));
-            printf("%d ", x);
-        }
+        GetVal((void *)address_a, &x, sizeof(int));
+        printf("%d ", x);
         printf("\n");
-    }
+    
 
 
     printf("Freeing the allocations!\n");
@@ -36,9 +35,13 @@ int main() {
     printf("Checking if allocations were freed!\n");
     a = myalloc(100*4);
     if ((int)a == old_a)
+    {
         printf("free function works\n");
+    }
     else
+    {
         printf("free function does not work\n");
+    }
 
     return 0;
 }
