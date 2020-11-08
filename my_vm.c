@@ -137,7 +137,7 @@ void myfree(void *va, int size) {
     //Free the page table entries starting from this virtual address (va)
     // Also mark the pages free in the bitmap
     //Only free if the memory from "va" to va+size is valid
-    free();
+    free(va);
 }
 
 
@@ -150,6 +150,8 @@ void PutVal(void *va, void *val, int size) {
        the contents of "val" to a physical page. NOTE: The "size" value can be larger
        than one page. Therefore, you may have to find multiple pages using Translate()
        function.*/
+    va = &val;
+    printf("Put value\n");
 
 }
 
@@ -161,7 +163,7 @@ void GetVal(void *va, void *val, int size) {
     "val" address. Assume you can access "val" directly by derefencing them.
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
-
+    val = &va;
 
 }
 
@@ -179,7 +181,7 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
     load each element and perform multiplication. Take a look at test.c! In addition to
     getting the values from two matrices, you will perform multiplication and
     store the result to the "answer array"*/
-for (i = 0; i < SIZE; i++) {
+/*for (i = 0; i < SIZE; i++) {
         for (j = 0; j < SIZE; j++) {
             GetVal((void *)address_a, &x, sizeof(int));
             GetVal((void *)address_b, &x, sizeof(int));
@@ -187,3 +189,4 @@ for (i = 0; i < SIZE; i++) {
     }
 
 }
+*/
