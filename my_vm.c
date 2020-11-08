@@ -1,19 +1,75 @@
 #include "my_vm.h"
-
+void *physicalMemory;
+bool initializePhysicalFlag = false;
 /*
-Function responsible for allocating and setting your physical memory 
+Function responsible for allocating and setting your physical memory
 */
 void SetPhysicalMem() {
 
     //Allocate physical memory using mmap or malloc; this is the total size of
     //your memory you are simulating
+     
+    physicalMemory = (void *) malloc(MAX_MEMSIZE);
+    initializePhysicalFlag = true;
 
-    
+    /*char * physicalMemory = mmap((void*) (PGSIZE * (1 << 100)),    
+    PGSIZE,                         
+    PROT_READ|PROT_WRITE|PROT_EXEC,
+    MAP_ANON|MAP_PRIVATE,             
+    0
+  );*/
+
     //HINT: Also calculate the number of physical and virtual pages and allocate
     //virtual and physical bitmaps and initialize them
+    numberOfPhysicalPages = MAX_MEMSIZE / PGSIZE;
+    numberOfVirtualPages = MAX_MEMSIZE /PGSIZE;
+
 
 }
 
+
+/*
+ * Part 2: Add a virtual to physical page translation to the TLB.
+ * Feel free to extend the function arguments or return type.
+ */
+int add_TLB(void *va, void *pa)
+{
+
+    /*Part 2 HINT: Add a virtual to physical page translation to the TLB */
+
+    return -1;
+}
+
+
+/*
+ * Part 2: Check TLB for a valid translation.
+ * Returns the physical page address.
+ * Feel free to extend this function and change the return type.
+ */
+pte_t *
+check_TLB(void *va) {
+
+    /* Part 2: TLB lookup code here */
+
+}
+
+
+/*
+ * Part 2: Print TLB miss rate.
+ * Feel free to extend the function arguments or return type.
+ */
+void
+print_TLB_missrate()
+{
+    double miss_rate = 0;
+
+    /*Part 2 Code here to calculate and print the TLB miss rate*/
+
+
+
+
+    fprintf(stderr, "TLB miss rate %lf \n", miss_rate);
+}
 
 
 /*
@@ -27,7 +83,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
 
 
     //If translation not successfull
-    return NULL; 
+    return NULL;
 }
 
 
@@ -52,7 +108,7 @@ PageMap(pde_t *pgdir, void *va, void *pa)
 /*Function that gets the next available page
 */
 void *get_next_avail(int num_pages) {
- 
+
     //Use virtual address bitmap to find the next free page
 }
 
@@ -63,13 +119,15 @@ and used by the benchmark
 void *myalloc(unsigned int num_bytes) {
 
     //HINT: If the physical memory is not yet initialized, then allocate and initialize.
+    if (initializePhysicalFlag == false)
+        SetPhysicalMem();
 
    /* HINT: If the page directory is not initialized, then initialize the
    page directory. Next, using get_next_avail(), check if there are free pages. If
-   free pages are available, set the bitmaps and map a new page. Note, you will 
+   free pages are available, set the bitmaps and map a new page. Note, you will
    have to mark which physical pages are used. */
 
-    return NULL;
+    return physicalMemory;
 }
 
 /* Responsible for releasing one or more memory pages using virtual address (va)
@@ -79,6 +137,7 @@ void myfree(void *va, int size) {
     //Free the page table entries starting from this virtual address (va)
     // Also mark the pages free in the bitmap
     //Only free if the memory from "va" to va+size is valid
+    free();
 }
 
 
@@ -117,9 +176,14 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
 
     /* Hint: You will index as [i * size + j] where  "i, j" are the indices of the
     matrix accessed. Similar to the code in test.c, you will use GetVal() to
-    load each element and perform multiplication. Take a look at test.c! In addition to 
-    getting the values from two matrices, you will perform multiplication and 
+    load each element and perform multiplication. Take a look at test.c! In addition to
+    getting the values from two matrices, you will perform multiplication and
     store the result to the "answer array"*/
+for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            GetVal((void *)address_a, &x, sizeof(int));
+            GetVal((void *)address_b, &x, sizeof(int));
+        }
+    }
 
-       
 }

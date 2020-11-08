@@ -8,10 +8,10 @@
 int main() {
 
     printf("Allocating three arrays of 400 bytes\n");
-    void *a = m_alloc(100*4);
+    void *a = myalloc(100*4);
     int old_a = (int)a;
-    void *b = m_alloc(100*4);
-    void *c = m_alloc(100*4);
+    void *b = myalloc(100*4);
+    void *c = myalloc(100*4);
     int x = 1;
     int y, z;
     int i =0, j=0;
@@ -28,7 +28,7 @@ int main() {
             PutVal((void *)address_a, &x, sizeof(int));
             PutVal((void *)address_b, &x, sizeof(int));
         }
-    } 
+    }
 
     printf("Fetching matrix elements stored in the arrays\n");
 
@@ -41,7 +41,7 @@ int main() {
             printf("%d ", y);
         }
         printf("\n");
-    } 
+    }
 
     printf("Performing matrix multiplication with itself!\n");
     MatMult(a, b, SIZE, c);
@@ -56,12 +56,12 @@ int main() {
         printf("\n");
     }
     printf("Freeing the allocations!\n");
-    a_free(a, 100*4);
-    a_free(b, 100*4);
-    a_free(c, 100*4);
-    
+    myfree(a, 100*4);
+    myfree(b, 100*4);
+    myfree(c, 100*4);
+
     printf("Checking if allocations were freed!\n");
-    a = m_alloc(100*4);
+    a = myalloc(100*4);
     if ((int)a == old_a)
         printf("free function works\n");
     else
