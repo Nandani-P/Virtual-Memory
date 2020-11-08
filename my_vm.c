@@ -21,8 +21,8 @@ void SetPhysicalMem() {
 
     //HINT: Also calculate the number of physical and virtual pages and allocate
     //virtual and physical bitmaps and initialize them
-    numberOfPhysicalPages = MAX_MEMSIZE / PGSIZE;
-    numberOfVirtualPages = MAX_MEMSIZE /PGSIZE;
+    //numberOfPhysicalPages = MAX_MEMSIZE / PGSIZE;
+    //numberOfVirtualPages = MAX_MEMSIZE /PGSIZE;
 
 
 }
@@ -139,7 +139,7 @@ void myfree(void *va, int size) {
     //Free the page table entries starting from this virtual address (va)
     // Also mark the pages free in the bitmap
     //Only free if the memory from "va" to va+size is valid
-    free(va, size);
+    free(va);
 }
 
 
@@ -189,6 +189,5 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
             GetVal((void *)address_b, &x, sizeof(int));
         }
     }
-
-}
 */
+}
