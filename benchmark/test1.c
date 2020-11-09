@@ -11,9 +11,10 @@ int main() {
     void *a = myalloc(100*4);
     int old_a = (int)a;
     //int x = 1;
-    char x1 = 'j';
+    //char x1 = 'j';
+    char x1[] = "Hello";
     //int y;
-    char y1;
+    char y1[6];
     int address_a = 0;
    
     printf("Addresses of the allocation: %x\n", (int)a);
@@ -22,12 +23,12 @@ int main() {
     address_a = (unsigned int)a;
     
     //PutVal((void *)address_a, &x, sizeof(int));
-    PutVal((void *)address_a, &x1, sizeof(char));        
+    PutVal((void *)address_a, &x1, sizeof(char)*6);        
     printf("Fetching matrix elements stored in the arrays\n");
 
     //GetVal((void *)address_a, &y, sizeof(int));
-    GetVal((void *)address_a, &y1, sizeof(char));
-    printf("%c ", y1);
+    GetVal((void *)address_a, &y1, sizeof(char)*6);
+    printf("%s ", y1);
     printf("\n");
     
 
