@@ -162,12 +162,12 @@ void PutVal(void *va, void *val, int size) {
 
 
     //va = val; this is wrong
-    int *physicalAddress;
-    physicalAddress = (int*)va;
+    void *physicalAddress;
+    physicalAddress = va;
 
-    int *pVal = (int*)val;
+    //int *pVal = (int*)val;
     //*physicalAddress =  *pVal;
-    memcpy(physicalAddress, pVal, size);
+    memcpy(physicalAddress, val, size);
     printf("Put value\n");
 
 }
@@ -190,13 +190,13 @@ void GetVal(void *va, void *val, int size) {
     //val = *va;    incorrect
     *val = (int) *physicalAddress;
     printf("get value done\n");*/
-    int *physicalAddress;
-    physicalAddress = (int*)va;
+    void *physicalAddress;
+    physicalAddress = va;
 
-    int *pVal = (int*)val;
+    //int *pVal = (int*)val;
 
     //*qVa =  *physicalAddress;
-    memcpy(pVal, physicalAddress, size);
+    memcpy(val, physicalAddress, size);
 
 }
 
