@@ -167,7 +167,7 @@ void PutVal(void *va, void *val, int size) {
 
     int *pVal = (int*)val;
     //*physicalAddress =  *pVal;
-    memcpy(*physicalAddress, *pVal, size);
+    memcpy(physicalAddress, pVal, size);
     printf("Put value\n");
 
 }
@@ -193,10 +193,10 @@ void GetVal(void *va, void *val, int size) {
     int *physicalAddress;
     physicalAddress = (int*)va;
 
-    int *qVa = (int*)val;
+    int *pVal = (int*)val;
 
     //*qVa =  *physicalAddress;
-    memcpy(*qVa, *physicalAddress, size);
+    memcpy(pVal, physicalAddress, size);
 
 }
 
