@@ -153,16 +153,20 @@ void PutVal(void *va, void *val, int size) {
        than one page. Therefore, you may have to find multiple pages using Translate()
        function.*/
     // physical address is equal to virtual address... for now
-    void *physicalAddress;
+    //void *physicalAddress;
 
     // find mapping
 
-
-    physicalAddress = va;
+    
+    //physicalAddress = va;
 
 
     //va = val; this is wrong
-    *physicalAddress = (int) *val;
+    int *physicalAddress;
+    physicalAddress = (int*)va;
+
+    int *pVal = (int*)val;
+    *physicalAddress =  *pVal;
 
     // physicalAddress = val;
     printf("Put value\n");
@@ -178,15 +182,20 @@ void GetVal(void *va, void *val, int size) {
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
 
-    void *physicalAddress;
+    /*void *physicalAddress;
 
     // find mapping
     physicalAddress = va;
 
 
-    //val = *va;    imcorrect
+    //val = *va;    incorrect
     *val = (int) *physicalAddress;
-    printf("get value done\n");
+    printf("get value done\n");*/
+    int *physicalAddress;
+    physicalAddress = (int*)va;
+
+    int *pVa = (int*)physicalAddress;
+    *val =  *pVa;
 
 }
 
