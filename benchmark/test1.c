@@ -10,20 +10,24 @@ int main() {
     printf("Allocating a variable of 400 bytes\n");
     void *a = myalloc(100*4);
     int old_a = (int)a;
-    int x = 1;
-    int y;
+    //int x = 1;
+    char x1 = 'j';
+    //int y;
+    char y1;
     int address_a = 0;
    
     printf("Addresses of the allocation: %x\n", (int)a);
 
     printf("Storing integer a\n");
     address_a = (unsigned int)a;
-    PutVal((void *)address_a, &x, sizeof(int));
-            
+    
+    //PutVal((void *)address_a, &x, sizeof(int));
+    PutVal((void *)address_a, &x1, sizeof(char));        
     printf("Fetching matrix elements stored in the arrays\n");
 
-    GetVal((void *)address_a, &y, sizeof(int));
-    printf("%d ", y);
+    //GetVal((void *)address_a, &y, sizeof(int));
+    GetVal((void *)address_a, &y1, sizeof(char));
+    printf("%c ", y1);
     printf("\n");
     
 
