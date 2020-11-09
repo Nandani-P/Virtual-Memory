@@ -162,7 +162,7 @@ void PutVal(void *va, void *val, int size) {
 
 
     //va = val; this is wrong
-    *physicalAddress = *val;
+    *physicalAddress = (int) *val;
 
     // physicalAddress = val;
     printf("Put value\n");
@@ -185,7 +185,7 @@ void GetVal(void *va, void *val, int size) {
 
 
     //val = *va;    imcorrect
-    *val = *physicalAddress;
+    *val = (int) *physicalAddress;
     printf("get value done\n");
 
 }
