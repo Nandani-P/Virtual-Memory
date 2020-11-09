@@ -194,8 +194,10 @@ void GetVal(void *va, void *val, int size) {
     int *physicalAddress;
     physicalAddress = (int*)va;
 
+    int *qVa = (int*)val;
     int *pVa = (int*)physicalAddress;
-    *val =  *pVa;
+
+    *qVa =  *pVa;
 
 }
 
