@@ -17,18 +17,18 @@ int main() {
     printf("Addresses of the allocation: %x\n", (int)a);
 
     printf("Storing integer a\n");
-            address_a = (unsigned int)a;
-            PutVal((void *)address_a, &x, sizeof(int));
+    address_a = (unsigned int)a;
+    PutVal((void *)address_a, &x, sizeof(int));
             
     printf("Fetching matrix elements stored in the arrays\n");
 
-        GetVal((void *)address_a, &y, sizeof(int));
-        printf("%d ", y);
-        printf("\n");
+    GetVal((void *)address_a, &y, sizeof(int));
+    printf("%d ", y);
+    printf("\n");
     
 
 
-    printf("Freeing the allocations!\n");
+    /*printf("Freeing the allocations!\n");
     //printf("%d\n", a );
     myfree(a, 100*4);
    
@@ -42,7 +42,7 @@ int main() {
     else
     {
         printf("free function does not work\n");
-    }
+    }*/
 
     return 0;
 }

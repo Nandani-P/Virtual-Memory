@@ -139,7 +139,7 @@ void myfree(void *va, int size) {
     //Free the page table entries starting from this virtual address (va)
     // Also mark the pages free in the bitmap
     //Only free if the memory from "va" to va+size is valid
-    free(va);
+    //free(va);
 }
 
 
@@ -152,7 +152,19 @@ void PutVal(void *va, void *val, int size) {
        the contents of "val" to a physical page. NOTE: The "size" value can be larger
        than one page. Therefore, you may have to find multiple pages using Translate()
        function.*/
-    va = &val;
+    // physical address is equal to virtual address... for now
+    void *physicalAddress;
+
+    // find mapping
+
+
+    physicalAddress = va;
+
+
+    //va = val; this is wrong
+    *physicalAddress = *val;
+
+    // physicalAddress = val;
     printf("Put value\n");
 
 }
@@ -165,7 +177,16 @@ void GetVal(void *va, void *val, int size) {
     "val" address. Assume you can access "val" directly by derefencing them.
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
-    val = *va;
+
+    void *physicalAddress;
+
+    // find mapping
+    physicalAddress = va;
+
+
+    //val = *va;    imcorrect
+    *val = *physicalAddress;
+    printf("get value done\n");
 
 }
 
