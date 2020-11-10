@@ -3,7 +3,9 @@ void *physicalMemory;
 bool initializePhysicalFlag = false;
 #define numberOfPages 1024*1024
 #define numberOfFrames 1024*1024
-
+int outerPageTable[1024];
+int innerPagetable[1024*1024];
+bool pFree[numberOfFrames] = {true};
 
 /*
 Function responsible for allocating and setting your physical memory
@@ -111,6 +113,17 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     and page table (2nd-level) indices. If no mapping exists, set the
     virtual to physical mapping */
 
+    int *addressPgTable;           //TO-DO mapping condition
+    int *addressPgDir;
+    addressPgTable = innerPageTable;
+
+    //
+    *addressPgTable = pa;
+
+    //memcpy(addressPgTable, &pa, size);
+    addressPgDir = outerPageTable;
+    *addressPgDir = innerPagetable;
+    
     return -1;
 }
 
@@ -119,7 +132,26 @@ PageMap(pde_t *pgdir, void *va, void *pa)
 */
 void *get_next_avail(int num_pages) {
 
+    //check for free space using PFree array of size is equal to physical memory
+    bool *pFreeAddress;
+
+    //
+    pFreeAddress = pFree;
+
     //Use virtual address bitmap to find the next free page
+    for (int i = 0; i < numberOfFrames; i++) {
+        if (pFree[i] == true){
+            for (int j = 0; j < num_pages; j++){  //TO-DO check for every page if it free 
+                pFree[i+j] = false;
+            printf("Free Flag: %u\n", pFree[i]);    
+            }
+            return physicalMemory + i;     //Have to test-- not sure of pointer
+
+        }
+    return NULL;    
+}
+
+
 }
 
 
@@ -132,13 +164,30 @@ void *myalloc(unsigned int num_bytes) {
     if (initializePhysicalFlag == false)
     {
         SetPhysicalMem();
+
     }
+    printf("Outer page table: %d", outerPageTable[1]);
 
    /* HINT: If the page directory is not initialized, then initialize the
    page directory. Next, using get_next_avail(), check if there are free pages. If
    free pages are available, set the bitmaps and map a new page. Note, you will
    have to mark which physical pages are used. */
 
+
+    int num_pages = num_bytes/PGSIZE;
+    if (num_bytes % PGSIZE != 0){
+        num_pages = num_pages + 1; 
+    }
+    
+
+    //checking for next free pages and getting the physical address of that page.
+    int *pa;
+    pa = get_next_avail(num_pages);   // check null on pointer
+
+    if (pa != NULL){
+        PageMap(pde_t *pgdir, va, pa);
+    }
+    
     return physicalMemory;
 }
 
@@ -169,6 +218,7 @@ void PutVal(void *va, void *val, int size) {
     // find mapping
     physicalAddress = va;
 
+    //setting value to a address(physicalAddress) 
     memcpy(physicalAddress, val, size);
     printf("Put value\n");
 
@@ -185,6 +235,8 @@ void GetVal(void *va, void *val, int size) {
 
     
     physicalAddress = va;
+
+    //setting value located at physicalAddress to val
     memcpy(val, physicalAddress, size);
     printf("get value done\n");
 }

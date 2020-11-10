@@ -1,4 +1,5 @@
 #ifndef MY_VM_H_INCLUDED
+
 #define MY_VM_H_INCLUDED
 #include <stdbool.h>
 #include <stdlib.h>
@@ -32,7 +33,7 @@ struct tlb {
     //Assume each bucket to be 4 bytes
 };
 struct tlb tlb_store;
-
+ 
 
 void SetPhysicalMem();
 pte_t* Translate(pde_t *pgdir, void *va);
