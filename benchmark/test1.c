@@ -17,14 +17,14 @@ int main() {
     char y1[6];
     int address_a = 0;
    
-    printf("Addresses of the allocation: %x\n", (int)a);
+    printf("Address of the allocation: %x\n", (int)a);
 
     printf("Storing integer a\n");
     address_a = (unsigned int)a;
     
     //PutVal((void *)address_a, &x, sizeof(int));
     PutVal((void *)address_a, &x1, sizeof(char)*6);        
-    printf("Fetching matrix elements stored in the arrays\n");
+    printf("Fetching element stored in the integer x\n");
 
     //GetVal((void *)address_a, &y, sizeof(int));
     GetVal((void *)address_a, &y1, sizeof(char)*6);

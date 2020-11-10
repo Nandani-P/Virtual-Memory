@@ -1,6 +1,10 @@
 #include "my_vm.h"
 void *physicalMemory;
 bool initializePhysicalFlag = false;
+#define numberOfPages 1024*1024
+#define numberOfFrames 1024*1024
+
+
 /*
 Function responsible for allocating and setting your physical memory
 */
@@ -21,8 +25,7 @@ void SetPhysicalMem() {
 
     //HINT: Also calculate the number of physical and virtual pages and allocate
     //virtual and physical bitmaps and initialize them
-    //numberOfPhysicalPages = MAX_MEMSIZE / PGSIZE;
-    //numberOfVirtualPages = MAX_MEMSIZE /PGSIZE;
+    
 
 
 }
@@ -81,6 +84,13 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     //2nd-level-page table index using the virtual address.  Using the page
     //directory index and page table index get the physical address
 
+    /*
+    outerPageTableAddress = physicalMemory(pgdir)
+    innerPageTableAddress = outerPageTableAddress(va.outer)
+    frameNumber = innerPageTable(va.inner)
+    physicalAddressOfFrame = frameNumber(va.offset)
+    return
+    */
 
     //If translation not successfull
     return NULL;
@@ -152,21 +162,13 @@ void PutVal(void *va, void *val, int size) {
        the contents of "val" to a physical page. NOTE: The "size" value can be larger
        than one page. Therefore, you may have to find multiple pages using Translate()
        function.*/
+
     // physical address is equal to virtual address... for now
-    //void *physicalAddress;
+   
 
     // find mapping
-
-    
-    //physicalAddress = va;
-
-
-    //va = val; this is wrong
-    void *physicalAddress;
     physicalAddress = va;
 
-    //int *pVal = (int*)val;
-    //*physicalAddress =  *pVal;
     memcpy(physicalAddress, val, size);
     printf("Put value\n");
 
@@ -181,23 +183,10 @@ void GetVal(void *va, void *val, int size) {
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
 
-    /*void *physicalAddress;
-
-    // find mapping
+    
     physicalAddress = va;
-
-
-    //val = *va;    incorrect
-    *val = (int) *physicalAddress;
-    printf("get value done\n");*/
-    void *physicalAddress;
-    physicalAddress = va;
-
-    //int *pVal = (int*)val;
-
-    //*qVa =  *physicalAddress;
     memcpy(val, physicalAddress, size);
-
+    printf("get value done\n");
 }
 
 
