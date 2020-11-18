@@ -1,11 +1,19 @@
 #include "my_vm.h"
 void *physicalMemory;
+int numberOfVirtPages;
+int numberOfPhysPages;
 bool initializePhysicalFlag = false;
-#define numberOfPages 1024*1024
-#define numberOfFrames 1024*1024
-int outerPageTable[1024];
-int innerPagetable[1024*1024];
-bool pFree[numberOfFrames] = {true};
+//#define numberOfPages 1024*1024
+//#define numberOfFrames 1024*1024
+
+//TO-DO Initialize following in the SetPhysicalMem() using bitmap
+int* innerPagetable[numberOfVirtPages];       //size of pte_t
+bool physicalCheckFree[numberOfPhysPages] = {true};
+bool virtualCheckFree[numberOfVirtPages] = {true};
+
+//int tukdetukde = numberOfVirtPages*sizeof(int)/(PGSIZE);
+int pageTableEntriesPerBlock = 1024;
+int* outerPageTable[1024];      //pde_t 
 
 /*
 Function responsible for allocating and setting your physical memory
@@ -14,19 +22,24 @@ void SetPhysicalMem() {
 
     //Allocate physical memory using mmap or malloc; this is the total size of
     //your memory you are simulating
-     
-    physicalMemory = (void *) malloc(MAX_MEMSIZE);
+    
+    physicalMemory = (void *) malloc(MEMSIZE);
     initializePhysicalFlag = true;
 
     /*char * physicalMemory = mmap((void*) (PGSIZE * (1 << 100)),    
     PGSIZE,                         
     PROT_READ|PROT_WRITE|PROT_EXEC,
     MAP_ANON|MAP_PRIVATE,             
-    0
+    
   );*/
 
     //HINT: Also calculate the number of physical and virtual pages and allocate
     //virtual and physical bitmaps and initialize them
+
+    numberOfVirtPages = MAX_MEMSIZE/ PGSIZE;
+    numberOfPhysPages = MEMSIZE/ PGSIZE;
+
+
     
 
 
@@ -113,16 +126,23 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     and page table (2nd-level) indices. If no mapping exists, set the
     virtual to physical mapping */
 
-    int *addressPgTable;           //TO-DO mapping condition
+    if outerPageTable[pgdir] == NULL
+        outerPageTable[pgdir] == va;
+
+    if innerPagetable[va] == NULL
+        innerPagetable[va] == pa;
+
+
+    /*int *addressPgTable;           //TO-DO 2 mapping condition
     int *addressPgDir;
     addressPgTable = innerPageTable;
 
-    //
+    //Mapping physical address to inner page table 
     *addressPgTable = pa;
 
     //memcpy(addressPgTable, &pa, size);
     addressPgDir = outerPageTable;
-    *addressPgDir = innerPagetable;
+    *addressPgDir = innerPagetable;*/
     
     return -1;
 }
@@ -130,31 +150,49 @@ PageMap(pde_t *pgdir, void *va, void *pa)
 
 /*Function that gets the next available page
 */
-void *get_next_avail(int num_pages) {
+void *get_next_avail_pa(int num_pages) {
 
-    //check for free space using PFree array of size is equal to physical memory
-    bool *pFreeAddress;
+    //check for free space using physicalCheckFree array of size is equal to physical memory
+    // bool *pFreeAddress;
 
-    //
-    pFreeAddress = pFree;
+    // //
+    // pFreeAddress = physicalCheckFree;
 
     //Use virtual address bitmap to find the next free page
-    for (int i = 0; i < numberOfFrames; i++) {
-        if (pFree[i] == true){
-            for (int j = 0; j < num_pages; j++){  //TO-DO check for every page if it free 
-                pFree[i+j] = false;
-            printf("Free Flag: %u\n", pFree[i]);    
+    for (int i = 0; i < numberOfPhysPages; i++) {     // numberOfFrames = numberOfPhysPages
+        if (physicalCheckFree[i] == true){
+            for (int j = 0; j < num_pages; j++){  //TO-DO 1 check for every page if it is free 
+                physicalCheckFree[i+j] = false;
+                printf("Free Flag: %u\n", physicalCheckFree[i]);    
             }
-            return physicalMemory + i;     //Have to test-- not sure of pointer
+            return physicalMemory + i*PGSIZE;     //Have to test
 
         }
-    return NULL;    
+    }
+    return NULL;
 }
 
+void *get_next_avail_va(int num_pages) {
 
+    //check for free space using physicalCheckFree array of size is equal to physical memory
+    // bool *pFreeAddress;
+
+    // //
+    // pFreeAddress = physicalCheckFree;
+
+    //Use virtual address bitmap to find the next free page
+    for (int i = 0; i < numberOfVirtPages; i++) {     // numberOfFrames = numberOfPhysPages
+        if (virtualCheckFree[i] == true){
+            for (int j = 0; j < num_pages; j++){  //TO-DO 1 check for every page if it is free 
+                virtualCheckFree[i+j] = false;
+                printf("Free Flag: %u\n", virtualCheckFree[i]);    
+            }
+            return innerPagetable + i*sizeof(int);     //Have to test
+
+        }
+    }
+    return NULL;
 }
-
-
 /* Function responsible for allocating pages
 and used by the benchmark
 */
@@ -173,7 +211,7 @@ void *myalloc(unsigned int num_bytes) {
    free pages are available, set the bitmaps and map a new page. Note, you will
    have to mark which physical pages are used. */
 
-
+    //numner of pages required when myalloc is called 
     int num_pages = num_bytes/PGSIZE;
     if (num_bytes % PGSIZE != 0){
         num_pages = num_pages + 1; 
@@ -182,13 +220,21 @@ void *myalloc(unsigned int num_bytes) {
 
     //checking for next free pages and getting the physical address of that page.
     int *pa;
-    pa = get_next_avail(num_pages);   // check null on pointer
+    pa = get_next_avail_pa(num_pages);   // check null condition in pointer
+
+    int *va;
+    va = get_next_avail_va(num_pages);   // check null condition in pointer
+
+    int *pgDirEntry;
+    pgDirEntry = va / pageTableEntriesPerBlock; 
 
     if (pa != NULL){
-        PageMap(pde_t *pgdir, va, pa);
+        PageMap(*pgDirEntry, va, pa);
     }
+
+    // return final VA 
     
-    return physicalMemory;
+    
 }
 
 /* Responsible for releasing one or more memory pages using virtual address (va)
@@ -233,7 +279,7 @@ void GetVal(void *va, void *val, int size) {
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
 
-    
+        
     physicalAddress = va;
 
     //setting value located at physicalAddress to val
