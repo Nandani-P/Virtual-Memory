@@ -147,6 +147,20 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     return -1;
 }
 
+bool check_require_avail_pa(int num_pages){
+    int havePageCounter = 0;
+    for (int i = 0; i < numberOfPhysPages; i++) {  
+        if (physicalCheckFree[i] == true){
+            havePageCounter++; 
+
+            if (havePageCounter == num_pages){
+                return true; 
+            }
+        }
+    }
+    return false;
+}
+
 
 /*Function that gets the next available page
 */
@@ -161,18 +175,15 @@ void *get_next_avail_pa(int num_pages) {
     //Use virtual address bitmap to find the next free page
     for (int i = 0; i < numberOfPhysPages; i++) {     // numberOfFrames = numberOfPhysPages
         if (physicalCheckFree[i] == true){
-            for (int j = 0; j < num_pages; j++){  //TO-DO 1 check for every page if it is free 
-                physicalCheckFree[i+j] = false;
-                printf("Free Flag: %u\n", physicalCheckFree[i]);    
-            }
+            physicalCheckFree[i] = false;
+            printf("PA Free Flag: %u\n", physicalCheckFree[i]);    
             return physicalMemory + i*PGSIZE;     //Have to test
-
         }
     }
     return NULL;
 }
 
-void *get_next_avail_va(int num_pages) {
+int get_next_avail_va(int num_pages) {
 
     //check for free space using physicalCheckFree array of size is equal to physical memory
     // bool *pFreeAddress;
@@ -201,7 +212,7 @@ void *get_next_avail_va(int num_pages) {
                 virtualCheckFree[i+j] = false;
                 printf("Free Flag: %u\n", virtualCheckFree[i]);    
             }
-            return innerPagetable + i*sizeof(int);     //Have to test
+            return i;     //Have to test 
 
         }
     }
@@ -231,21 +242,35 @@ void *myalloc(unsigned int num_bytes) {
         num_pages = num_pages + 1; 
     }
     
-    int *va;
-    va = get_next_avail_va(num_pages);   // check null condition in pointer
-
-    
-    int *pgDirEntry;
-    pgDirEntry = va / pageTableEntriesPerBlock; 
-
-    int *pa;
-    for (int i = 0; i < num_pages; i++) {
-    //checking for next free pages and getting the physical address of that page.
-    pa = get_next_avail_pa(num_pages);   // check null condition in pointer
-    if (pa != NULL){
-        PageMap(*pgDirEntry, va, pa);
+    printf("Searching for virtual memory");
+    int va_EntryNumber;
+    va_EntryNumber = get_next_avail_va(num_pages);   // check null condition in pointer
+    if (va_EntryNumber == NULL){
+        printf("virtual memory is not available");
+        return NULL;
     }
-}
+    
+    int pgDirEntryNumber;
+    pgDirEntryNumber = va_EntryNumber / pageTableEntriesPerBlock; 
+    
+    va = innerPagetable + va_EntryNumber*sizeof(int);  // Should use bitmap size instead of int
+
+    printf("Searching for physical memory");
+    int *pa;
+    
+    if (check_require_avail_pa(num_pages) == false){
+        printf("Physical memory not found");
+        return NULL;
+    }
+
+
+    for (int i = 0; i < num_pages; i++) {
+        //checking for next free pages and getting the physical address of that page.
+        pa = get_next_avail_pa(num_pages);   // check null condition in pointer
+        if (pa != NULL){
+            PageMap(*pgDirEntry, va, pa);
+        }
+    }
 
     // return final 32 bit VA 
     
