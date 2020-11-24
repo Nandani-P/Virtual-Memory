@@ -181,9 +181,23 @@ void *get_next_avail_va(int num_pages) {
     // pFreeAddress = physicalCheckFree;
 
     //Use virtual address bitmap to find the next free page
-    for (int i = 0; i < numberOfVirtPages; i++) {     // numberOfFrames = numberOfPhysPages
+    for (int i = 0; i < (numberOfVirtPages - num_pages); i++) {     // numberOfFrames = numberOfPhysPages
         if (virtualCheckFree[i] == true){
-            for (int j = 0; j < num_pages; j++){  //TO-DO 1 check for every page if it is free 
+
+            bool haveContinuousPages = true;
+            for (int j = 0; j < num_pages; j++){
+                if (virtualCheckFree[i+j] != true){
+                    haveContinuousPages = false;
+                    break;
+                }
+            }
+
+            if (!haveContinuousPages){
+                // find next
+                continue;
+            }
+
+            for (int j = 0; j < num_pages; j++){  
                 virtualCheckFree[i+j] = false;
                 printf("Free Flag: %u\n", virtualCheckFree[i]);    
             }
@@ -217,22 +231,23 @@ void *myalloc(unsigned int num_bytes) {
         num_pages = num_pages + 1; 
     }
     
-
-    //checking for next free pages and getting the physical address of that page.
-    int *pa;
-    pa = get_next_avail_pa(num_pages);   // check null condition in pointer
-
     int *va;
     va = get_next_avail_va(num_pages);   // check null condition in pointer
 
+    
     int *pgDirEntry;
     pgDirEntry = va / pageTableEntriesPerBlock; 
 
+    int *pa;
+    for (int i = 0; i < num_pages; i++) {
+    //checking for next free pages and getting the physical address of that page.
+    pa = get_next_avail_pa(num_pages);   // check null condition in pointer
     if (pa != NULL){
         PageMap(*pgDirEntry, va, pa);
     }
+}
 
-    // return final VA 
+    // return final 32 bit VA 
     
     
 }
