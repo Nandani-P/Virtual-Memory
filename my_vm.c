@@ -151,8 +151,9 @@ PageMap(pde_t *pgdir, void *va, void *pa)
         outerPageTable[firstTenbitsVA] == pgdir;
     }
 
+    unsigned int pgdir_int = pgdir;
     unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
-    int addressInnerPgTable = pgdir *pageTableEntriesPerBlock + nextTenbitsVA;
+    int addressInnerPgTable = (pgdir_int * pageTableEntriesPerBlock) + nextTenbitsVA;
     if (innerPagetable[addressInnerPgTable] == NULL){
         innerPagetable[addressInnerPgTable] == pa;
     }
