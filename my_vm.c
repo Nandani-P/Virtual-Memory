@@ -301,7 +301,7 @@ void PutVal(void *va, void *val, int size) {
     for (int i = 0; i < num_pages; i++) {
         physicalAddress = Translate(NULL, va + (PGSIZE * i) );
         //setting value to a address(physicalAddress) 
-        memcpy(physicalAddress, val + PGSIZE, PGSIZE);
+        memcpy(physicalAddress, (char*)val+(PGSIZE * i), PGSIZE);
     }
 
 }
@@ -323,8 +323,8 @@ void GetVal(void *va, void *val, int size) {
     for (int i = 0; i < num_pages; i++) {
         physicalAddress = Translate(NULL, va + (PGSIZE * i));
         //setting value located at physicalAddress to val
-        memcpy(val, physicalAddress, PGSIZE);
-    }    
+        memcpy((char*)val+(PGSIZE * i), physicalAddress, PGSIZE);
+    }
     printf("get value done\n");
 }
 
