@@ -3,8 +3,6 @@ void *physicalMemory;
 int numberOfVirtPages;
 int numberOfPhysPages;
 bool initializePhysicalFlag = false;
-//#define numberOfPages 1024*1024
-//#define numberOfFrames 1024*1024
 
 //TO-DO 1 Initialize following in the SetPhysicalMem() using bitmap
 int* innerPagetable[numberOfVirtPages];       //size of pte_t
@@ -279,6 +277,24 @@ void myfree(void *va, int size) {
     // Also mark the pages free in the bitmap
     //Only free if the memory from "va" to va+size is valid
     //free(va);
+    printf("My Free started");
+    int num_pages = size/PGSIZE;
+    if (size % PGSIZE != 0){
+        num_pages = num_pages + 1; 
+    }
+    unsigned int va_int = va; 
+    unsigned int firstTenbitsVA = va_int >> 22;
+    int pgdirVal = outerPageTable[firstTenbitsVA];
+    
+    unsigned int nextTenbitsVA = (va & secondTenBitsMask) >> 12;
+    int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
+
+    for (int i = 0; i < num_pages; i++) {
+        void *pa = innerPagetable[addressInnerPgTable + i];
+        innerPagetable[addressInnerPgTable + i] = NULL;
+        physicalCheckFree[(pa - physicalMemory)/PGSIZE] = true;
+        virtualCheckFree[addressInnerPgTable + i] = true;  
+    }
 }
 
 
@@ -299,7 +315,7 @@ void PutVal(void *va, void *val, int size) {
     }
     pte_t * physicalAddress;
     for (int i = 0; i < num_pages; i++) {
-        physicalAddress = Translate(NULL, va + (PGSIZE * i) );
+        physicalAddress = Translate(NULL, va + (PGSIZE * i) );  // TO-DO check va 
         //setting value to a address(physicalAddress) 
         memcpy(physicalAddress, (char*)val+(PGSIZE * i), PGSIZE);
     }
