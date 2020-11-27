@@ -39,8 +39,8 @@ void SetPhysicalMem() {
     numberOfPhysPages = MEMSIZE/ PGSIZE; 
 
     innerPagetable[numberOfVirtPages];       //size of pte_t
-    physicalCheckFree[numberOfPhysPages] = {true};
-    virtualCheckFree[numberOfVirtPages] = {true};
+    physicalCheckFree[numberOfPhysPages] = { true };
+    virtualCheckFree[numberOfVirtPages] = { true };
 
 }
 
