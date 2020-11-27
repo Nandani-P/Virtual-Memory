@@ -12,6 +12,7 @@ bool physicalCheckFree[numberOfPhysPages] = {true};
 bool virtualCheckFree[numberOfVirtPages] = {true};
 
 //int tukdetukde = numberOfVirtPages*sizeof(int)/(PGSIZE);
+unsigned int secondTenBitsMask = 4190208;
 int pageTableEntriesPerBlock = 1024;
 int* outerPageTable[1024];      //pde_t 
 
@@ -96,26 +97,16 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     //directory index and page table index get the physical address
     unsigned int va_int = va; 
     unsigned int firstTenbitsVA = va_int >> 22;
-    if outerPageTable[firstTenbitsVA] == NULL
-        outerPageTable[firstTenbitsVA] == pgdir;
-
-    unsigned int nextTenbitsVA = (va & secondTenBits) >> 12;
-    int addressInnerPgTable = pgDir *pageTableEntriesPerBlock + nextTenbitsVA;
+    int pgdirVal = outerPageTable[firstTenbitsVA];
+    pte_t *pa;
+        
+    unsigned int nextTenbitsVA = (va & secondTenBitsMask) >> 12;
+    int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
     if innerPagetable[addressInnerPgTable] == NULL
         pa = innerPagetable[addressInnerPgTable];
+        return pa;
 
-    return pa;
-
-
-    /*
-    outerPageTableAddress = physicalMemory(pgdir)
-    innerPageTableAddress = outerPageTableAddress(va.outer)
-    frameNumber = innerPageTable(va.inner)
-    physicalAddressOfFrame = frameNumber(va.offset)
-    return
-    */
-
-    //If translation not successfull
+   //If translation not successfull
     return NULL;
 }
 
@@ -138,7 +129,7 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     if outerPageTable[firstTenbitsVA] == NULL
         outerPageTable[firstTenbitsVA] == pgdir;
 
-    unsigned int nextTenbitsVA = (va & secondTenBits) >> 12;
+    unsigned int nextTenbitsVA = (va & secondTenBitsMask) >> 12;
     int addressInnerPgTable = pgDir *pageTableEntriesPerBlock + nextTenbitsVA;
     if innerPagetable[addressInnerPgTable] == NULL
         innerPagetable[addressInnerPgTable] == pa;
@@ -260,10 +251,10 @@ void *myalloc(unsigned int num_bytes) {
     va_int = va_int | pgTableEntryNumberInBlock;
     va_int = va_int << 12;  // last 12 bits for offset from 32 bit VA
     //unsigned int firstTenBits = 4290772992;
-    unsigned int secondTenBits = 4190208;
+    
     //int lastTwelveBits = 4095;
     printf("VA initial 10 bits: %u\n", va_int >> 22);
-    printf("VA next 10 bits: %u\n", (va_int & secondTenBits)>> 12); 
+    printf("VA next 10 bits: %u\n", (va_int & secondTenBitsMask)>> 12); 
     void *va = va_int;
 
     pde_t *pgDir = pgDirEntryNumber; // Assuming page directory entry number is same as inner page block number
