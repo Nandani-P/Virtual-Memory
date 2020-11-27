@@ -216,8 +216,9 @@ int get_next_avail_va(int num_pages) {
 
             for (int j = 0; j < num_pages; j++){  
                 virtualCheckFree[i+j] = false;
-                printf("Free Flag: %u\n", virtualCheckFree[i]);    
+                    
             }
+            printf("Virtual address inside get_next_avail_va: %d\n", i);
             return i;     //Have to test 
 
         }
