@@ -188,7 +188,8 @@ void *get_next_avail_pa(int num_pages) {
     for (int i = 0; i < numberOfPhysPages; i++) {     // numberOfFrames = numberOfPhysPages
         if (physicalCheckFree[i] == true){
             physicalCheckFree[i] = false;
-            printf("PA Free Flag: %u\n", physicalCheckFree[i]);    
+            printf("PA Free Flag: %d\n", i); 
+            printf("PA Free Flag: %u\n", physicalMemory + i*PGSIZE);   
             return physicalMemory + i*PGSIZE;     //Have to test
         }
     }
