@@ -6,7 +6,7 @@ bool initializePhysicalFlag = false;
 //#define numberOfPages 1024*1024
 //#define numberOfFrames 1024*1024
 
-//TO-DO Initialize following in the SetPhysicalMem() using bitmap
+//TO-DO 1 Initialize following in the SetPhysicalMem() using bitmap
 int* innerPagetable[numberOfVirtPages];       //size of pte_t
 bool physicalCheckFree[numberOfPhysPages] = {true};
 bool virtualCheckFree[numberOfVirtPages] = {true};
@@ -37,11 +37,7 @@ void SetPhysicalMem() {
     //virtual and physical bitmaps and initialize them
 
     numberOfVirtPages = MAX_MEMSIZE/ PGSIZE;
-    numberOfPhysPages = MEMSIZE/ PGSIZE;
-
-
-    
-
+    numberOfPhysPages = MEMSIZE/ PGSIZE; 
 
 }
 
@@ -125,12 +121,14 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     /*HINT: Similar to Translate(), find the page directory (1st level)
     and page table (2nd-level) indices. If no mapping exists, set the
     virtual to physical mapping */
+    unsigned int va_int = va; 
+    unsigned int firstTenbitsVA = va_int >> 22;
+    if outerPageTable[firstTenbitsVA] == NULL
+        outerPageTable[firstTenbitsVA] == firstTenbitsVA;
 
-    if outerPageTable[pgdir] == NULL
-        outerPageTable[pgdir] == va;
-
-    if innerPagetable[va] == NULL
-        innerPagetable[va] == pa;
+    unsigned int nextTenbitsVA = (va & secondTenBits) >> 12;
+    if innerPagetable[nextTenbitsVA] == NULL
+        innerPagetable[nextTenbitsVA] == pa;
 
 
     /*int *addressPgTable;           //TO-DO 2 mapping condition
@@ -168,8 +166,6 @@ void *get_next_avail_pa(int num_pages) {
 
     //check for free space using physicalCheckFree array of size is equal to physical memory
     // bool *pFreeAddress;
-
-    // //
     // pFreeAddress = physicalCheckFree;
 
     //Use virtual address bitmap to find the next free page
@@ -184,12 +180,6 @@ void *get_next_avail_pa(int num_pages) {
 }
 
 int get_next_avail_va(int num_pages) {
-
-    //check for free space using physicalCheckFree array of size is equal to physical memory
-    // bool *pFreeAddress;
-
-    // //
-    // pFreeAddress = physicalCheckFree;
 
     //Use virtual address bitmap to find the next free page
     for (int i = 0; i < (numberOfVirtPages - num_pages); i++) {     // numberOfFrames = numberOfPhysPages
@@ -242,7 +232,15 @@ void *myalloc(unsigned int num_bytes) {
         num_pages = num_pages + 1; 
     }
     
+    printf("Searching for physical memory");
+    
+    if (check_require_avail_pa(num_pages) == false){
+        printf("Physical memory not found");
+        return NULL;
+    }
+
     printf("Searching for virtual memory");
+
     int va_EntryNumber;
     va_EntryNumber = get_next_avail_va(num_pages);   // check null condition in pointer
     if (va_EntryNumber == NULL){
@@ -252,24 +250,33 @@ void *myalloc(unsigned int num_bytes) {
     
     int pgDirEntryNumber;
     pgDirEntryNumber = va_EntryNumber / pageTableEntriesPerBlock; 
-    
-    va = innerPagetable + va_EntryNumber*sizeof(int);  // Should use bitmap size instead of int
 
-    printf("Searching for physical memory");
-    int *pa;
-    
-    if (check_require_avail_pa(num_pages) == false){
-        printf("Physical memory not found");
-        return NULL;
-    }
+    int pgTableEntryNumberInBlock = va_EntryNumber % pageTableEntriesPerBlock; 
 
+    // calculate 32- bit VA
+    void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);  
+    unsigned int va_int = pgDirEntryNumber;
+    va_int = va_int << 10;
+    va_int = va_int | pgTableEntryNumberInBlock;
+    va_int = va_int << 12;  // last 12 bits for offset from 32 bit VA
+    //unsigned int firstTenBits = 4290772992;
+    unsigned int secondTenBits = 4190208;
+    //int lastTwelveBits = 4095;
+    printf("VA initial 10 bits: %u\n", va_int >> 22);
+    printf("VA next 10 bits: %u\n", (va_int & secondTenBits)>> 12); 
+    void *va = va_int;
+
+    pde_t *pgDir;
+    void *pa;
 
     for (int i = 0; i < num_pages; i++) {
         //checking for next free pages and getting the physical address of that page.
         pa = get_next_avail_pa(num_pages);   // check null condition in pointer
-        if (pa != NULL){
-            PageMap(*pgDirEntry, va, pa);
+        if (pa == NULL){
+           printf("This should never happen");
         }
+        
+        PageMap(pgDir, va, pa);
     }
 
     // return final 32 bit VA 
