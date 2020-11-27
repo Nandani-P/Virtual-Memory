@@ -103,7 +103,7 @@ print_TLB_missrate()
 
 
 
-    fprintf(stderr, "TLB miss rate %lf \n", miss_rate);
+    printf(stderr, "TLB miss rate %lf \n", miss_rate);
 }
 
 
@@ -234,7 +234,7 @@ void *myalloc(unsigned int num_bytes) {
     {
         SetPhysicalMem();
     }
-    printf("Outer page table: %d", outerPageTable[1]);
+    printf("Outer page table: %d\n", outerPageTable[1]);
 
    /* HINT: If the page directory is not initialized, then initialize the
    page directory. Next, using get_next_avail(), check if there are free pages. If
@@ -247,19 +247,19 @@ void *myalloc(unsigned int num_bytes) {
         num_pages = num_pages + 1; 
     }
     
-    printf("Searching for physical memory");
+    printf("Searching for physical memory\n");
     
     if (check_require_avail_pa(num_pages) == false){
-        printf("Physical memory not found");
+        printf("Physical memory not found\n");
         return NULL;
     }
 
-    printf("Searching for virtual memory");
+    printf("Searching for virtual memory\n");
 
     int va_EntryNumber;
     va_EntryNumber = get_next_avail_va(num_pages);   // check null condition in pointer
     if (va_EntryNumber == NULL){
-        printf("virtual memory is not available");
+        printf("virtual memory is not available\n");
         return NULL;
     }
     
@@ -288,7 +288,7 @@ void *myalloc(unsigned int num_bytes) {
         //checking for next free pages and getting the physical address of that page.
         pa = get_next_avail_pa(num_pages);   // check null condition in pointer
         if (pa == NULL){
-           printf("This should never happen");
+           printf("This should never happen\n");
         }
         PageMap(pgDir, va, pa);
     }
@@ -303,7 +303,7 @@ void myfree(void *va, int size) {
     // Also mark the pages free in the bitmap
     //Only free if the memory from "va" to va+size is valid
     //free(va);
-    printf("My Free started");
+    printf("My Free started\n");
     int num_pages = size/PGSIZE;
     if (size % PGSIZE != 0){
         num_pages = num_pages + 1; 

@@ -12,7 +12,7 @@ int main() {
     int old_a = (int)a;
     //int x = 1;
     //char x1 = 'j';
-    char x1[] = "Hello";
+    char x1[] = "Hello\n";
     //int y;
     char y1[6];
     int address_a = 0;
