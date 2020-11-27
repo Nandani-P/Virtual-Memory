@@ -292,14 +292,17 @@ void PutVal(void *va, void *val, int size) {
        than one page. Therefore, you may have to find multiple pages using Translate()
        function.*/
 
-    // physical address is equal to virtual address... for now
-
-    // find mapping
-    physicalAddress = va;
-
-    //setting value to a address(physicalAddress) 
-    memcpy(physicalAddress, val, size);
     printf("Put value\n");
+    int num_pages = size/PGSIZE;
+    if (size % PGSIZE != 0){
+        num_pages = num_pages + 1; 
+    }
+    pte_t * physicalAddress;
+    for (int i = 0; i < num_pages; i++) {
+        physicalAddress = Translate(NULL, va + (PGSIZE * i) );
+        //setting value to a address(physicalAddress) 
+        memcpy(physicalAddress, val + PGSIZE, PGSIZE);
+    }
 
 }
 
@@ -312,11 +315,16 @@ void GetVal(void *va, void *val, int size) {
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
 
-        
-    physicalAddress = va;
-
-    //setting value located at physicalAddress to val
-    memcpy(val, physicalAddress, size);
+    int num_pages = size/PGSIZE;
+    if (size % PGSIZE != 0){
+        num_pages = num_pages + 1; 
+    }
+    pte_t * physicalAddress;
+    for (int i = 0; i < num_pages; i++) {
+        physicalAddress = Translate(NULL, va + (PGSIZE * i));
+        //setting value located at physicalAddress to val
+        memcpy(val, physicalAddress, PGSIZE);
+    }    
     printf("get value done\n");
 }
 
