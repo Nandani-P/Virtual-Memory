@@ -5,9 +5,9 @@ int numberOfPhysPages;
 bool initializePhysicalFlag = false;
 
 //TO-DO 1 Initialize following in the SetPhysicalMem() using bitmap
-int* innerPagetable[];       //size of pte_t
-bool physicalCheckFree[];
-bool virtualCheckFree[];
+int** innerPagetable;       //size of pte_t
+bool* physicalCheckFree;
+bool* virtualCheckFree;
 
 //int tukdetukde = numberOfVirtPages*sizeof(int)/(PGSIZE);
 unsigned int secondTenBitsMask = 4190208;
@@ -38,9 +38,26 @@ void SetPhysicalMem() {
     numberOfVirtPages = MAX_MEMSIZE/ PGSIZE;
     numberOfPhysPages = MEMSIZE/ PGSIZE; 
 
-    innerPagetable[numberOfVirtPages];       //size of pte_t
-    physicalCheckFree[numberOfPhysPages] = { true };
-    virtualCheckFree[numberOfVirtPages] = { true };
+    innerPagetable = malloc(numberOfVirtPages*sizeof(int*));
+    for(i = 0; i<numberOfVirtPages; ++i){
+        innerPagetable[i] = NULL;
+    }
+
+    physicalCheckFree = malloc(numberOfPhysPages*sizeof(bool));
+    for(i = 0; i<numberOfPhysPages; ++i){
+        physicalCheckFree[i] = true;
+    }
+
+    virtualCheckFree = malloc(numberOfVirtPages*sizeof(bool));
+    for(i = 0; i<numberOfVirtPages; ++i){
+        virtualCheckFree[i] = true;
+    }
+
+
+    //innerPagetable[numberOfVirtPages];   
+        //size of pte_t
+    //physicalCheckFree[numberOfPhysPages] = { true };
+    //virtualCheckFree[numberOfVirtPages] = { true };
 
 }
 
