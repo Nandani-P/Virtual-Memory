@@ -223,7 +223,7 @@ int get_next_avail_va(int num_pages) {
 
         }
     }
-    return NULL;
+    return -1;
 }
 /* Function responsible for allocating pages
 and used by the benchmark
@@ -259,7 +259,7 @@ void *myalloc(unsigned int num_bytes) {
 
     int va_EntryNumber;
     va_EntryNumber = get_next_avail_va(num_pages);   // check null condition in pointer
-    if (va_EntryNumber == NULL){
+    if (va_EntryNumber == -1){
         printf("virtual memory is not available\n");
         return NULL;
     }
