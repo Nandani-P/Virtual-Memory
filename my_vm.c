@@ -200,7 +200,7 @@ int get_next_avail_va(int num_pages) {
     //Use virtual address bitmap to find the next free page
     for (int i = 0; i < (numberOfVirtPages - num_pages); i++) {     // numberOfFrames = numberOfPhysPages
         if (virtualCheckFree[i] == true){
-
+            printf("Inside get_next_avail_va if condition\n");
             bool haveContinuousPages = true;
             for (int j = 0; j < num_pages; j++){
                 if (virtualCheckFree[i+j] != true){
