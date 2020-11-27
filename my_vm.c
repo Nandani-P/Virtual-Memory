@@ -94,6 +94,18 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     //HINT: Get the Page directory index (1st level) Then get the
     //2nd-level-page table index using the virtual address.  Using the page
     //directory index and page table index get the physical address
+    unsigned int va_int = va; 
+    unsigned int firstTenbitsVA = va_int >> 22;
+    if outerPageTable[firstTenbitsVA] == NULL
+        outerPageTable[firstTenbitsVA] == pgdir;
+
+    unsigned int nextTenbitsVA = (va & secondTenBits) >> 12;
+    int addressInnerPgTable = pgDir *pageTableEntriesPerBlock + nextTenbitsVA;
+    if innerPagetable[addressInnerPgTable] == NULL
+        pa = innerPagetable[addressInnerPgTable];
+
+    return pa;
+
 
     /*
     outerPageTableAddress = physicalMemory(pgdir)
@@ -124,24 +136,13 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     unsigned int va_int = va; 
     unsigned int firstTenbitsVA = va_int >> 22;
     if outerPageTable[firstTenbitsVA] == NULL
-        outerPageTable[firstTenbitsVA] == firstTenbitsVA;
+        outerPageTable[firstTenbitsVA] == pgdir;
 
     unsigned int nextTenbitsVA = (va & secondTenBits) >> 12;
-    if innerPagetable[nextTenbitsVA] == NULL
-        innerPagetable[nextTenbitsVA] == pa;
+    int addressInnerPgTable = pgDir *pageTableEntriesPerBlock + nextTenbitsVA;
+    if innerPagetable[addressInnerPgTable] == NULL
+        innerPagetable[addressInnerPgTable] == pa;
 
-
-    /*int *addressPgTable;           //TO-DO 2 mapping condition
-    int *addressPgDir;
-    addressPgTable = innerPageTable;
-
-    //Mapping physical address to inner page table 
-    *addressPgTable = pa;
-
-    //memcpy(addressPgTable, &pa, size);
-    addressPgDir = outerPageTable;
-    *addressPgDir = innerPagetable;*/
-    
     return -1;
 }
 
@@ -217,7 +218,6 @@ void *myalloc(unsigned int num_bytes) {
     if (initializePhysicalFlag == false)
     {
         SetPhysicalMem();
-
     }
     printf("Outer page table: %d", outerPageTable[1]);
 
@@ -254,7 +254,7 @@ void *myalloc(unsigned int num_bytes) {
     int pgTableEntryNumberInBlock = va_EntryNumber % pageTableEntriesPerBlock; 
 
     // calculate 32- bit VA
-    void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);  
+    //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);  
     unsigned int va_int = pgDirEntryNumber;
     va_int = va_int << 10;
     va_int = va_int | pgTableEntryNumberInBlock;
@@ -266,7 +266,7 @@ void *myalloc(unsigned int num_bytes) {
     printf("VA next 10 bits: %u\n", (va_int & secondTenBits)>> 12); 
     void *va = va_int;
 
-    pde_t *pgDir;
+    pde_t *pgDir = pgDirEntryNumber; // Assuming page directory entry number is same as inner page block number
     void *pa;
 
     for (int i = 0; i < num_pages; i++) {
@@ -275,13 +275,9 @@ void *myalloc(unsigned int num_bytes) {
         if (pa == NULL){
            printf("This should never happen");
         }
-        
         PageMap(pgDir, va, pa);
     }
-
-    // return final 32 bit VA 
-    
-    
+    return va;
 }
 
 /* Responsible for releasing one or more memory pages using virtual address (va)
@@ -306,7 +302,6 @@ void PutVal(void *va, void *val, int size) {
        function.*/
 
     // physical address is equal to virtual address... for now
-   
 
     // find mapping
     physicalAddress = va;
