@@ -38,6 +38,7 @@ void SetPhysicalMem() {
     numberOfVirtPages = MAX_MEMSIZE/ PGSIZE;
     numberOfPhysPages = MEMSIZE/ PGSIZE; 
 
+    int i;
     innerPagetable = malloc(numberOfVirtPages*sizeof(int*));
     for(i = 0; i<numberOfVirtPages; ++i){
         innerPagetable[i] = NULL;
@@ -119,12 +120,13 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     int pgdirVal = outerPageTable[firstTenbitsVA];
     pte_t *pa;
         
-    unsigned int nextTenbitsVA = (va & secondTenBitsMask) >> 12;
+    unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
     int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
-    if innerPagetable[addressInnerPgTable] == NULL
+    if (innerPagetable[addressInnerPgTable] == NULL){
         pa = innerPagetable[addressInnerPgTable];
         return pa;
-
+    }
+        
    //If translation not successfull
     return NULL;
 }
@@ -145,13 +147,15 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     virtual to physical mapping */
     unsigned int va_int = va; 
     unsigned int firstTenbitsVA = va_int >> 22;
-    if outerPageTable[firstTenbitsVA] == NULL
+    if (outerPageTable[firstTenbitsVA] == NULL){
         outerPageTable[firstTenbitsVA] == pgdir;
+    }
 
-    unsigned int nextTenbitsVA = (va & secondTenBitsMask) >> 12;
-    int addressInnerPgTable = pgDir *pageTableEntriesPerBlock + nextTenbitsVA;
-    if innerPagetable[addressInnerPgTable] == NULL
+    unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
+    int addressInnerPgTable = pgdir *pageTableEntriesPerBlock + nextTenbitsVA;
+    if (innerPagetable[addressInnerPgTable] == NULL){
         innerPagetable[addressInnerPgTable] == pa;
+    }
 
     return -1;
 }
