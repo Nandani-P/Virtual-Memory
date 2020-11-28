@@ -91,8 +91,6 @@ print_TLB_missrate()
     /*Part 2 Code here to calculate and print the TLB miss rate*/
 
 
-
-
     printf(stderr, "TLB miss rate %lf \n", miss_rate);
 }
 
@@ -121,11 +119,11 @@ pte_t * Translate(pde_t *pgdir, void *va) {
 
     if (innerPagetable[addressInnerPgTable] != NULL){
         pa = innerPagetable[addressInnerPgTable];
-        printf("PA in Translate before: %u\n", pa);
+        //printf("PA in Translate before offset: %u\n", pa);
 
         // adding offset to PA
         pa = (char*) pa + offset;
-        printf("PA in Translate After offset: %u\n", pa);
+        //printf("PA in Translate after offset: %u\n", pa);
         return pa;
     }
         
@@ -162,10 +160,10 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     
     int addressInnerPgTable = (pgdir_int * pageTableEntriesPerBlock) + nextTenbitsVA;
 
-    printf("Address Inner Page Table in PageMap %d\n", addressInnerPgTable);
+    //printf("Address Inner Page Table in PageMap %d\n", addressInnerPgTable);
     if (innerPagetable[addressInnerPgTable] == NULL){
         innerPagetable[addressInnerPgTable] = pa;
-         printf("PA inside PageMap if condition: %u\n", innerPagetable[addressInnerPgTable]);
+        //printf("PA inside PageMap if condition: %u\n", innerPagetable[addressInnerPgTable]);
     }
     return -1;
 }
@@ -195,8 +193,9 @@ void *get_next_avail_pa(int num_pages) {
     for (int i = 0; i < numberOfPhysPages; i++) {     
         if (physicalCheckFree[i] == true){
             physicalCheckFree[i] = false;
-            printf("PA Free Flag: %d\n", i); 
-            printf("PA Free Flag: %u\n", physicalMemory + i*PGSIZE);   
+
+            // printf("PA Free Flag: %d\n", i); 
+            // printf("PA Free Flag: %u\n", physicalMemory + i*PGSIZE);   
             return physicalMemory + i*PGSIZE;     //Have to test
         }
     }
@@ -243,7 +242,7 @@ void *myalloc(unsigned int num_bytes) {
     {
         SetPhysicalMem();
     }
-    printf("Outer page table: %d\n", outerPageTable[1]);
+    //printf("Outer page table: %d\n", outerPageTable[1]);
 
    /* HINT: If the page directory is not initialized, then initialize the
    page directory. Next, using get_next_avail(), check if there are free pages. If
@@ -348,8 +347,9 @@ void PutVal(void *va, void *val, int size) {
     pte_t * physicalAddress;
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
-        printf("After translate\n");
-        printf("Val:    %u\n", (char*)val+i);
+        //printf("After translate\n");
+        //printf("Val:    %u\n", (char*)val+i);
+
         //setting value to a address(physicalAddress) 
         memcpy(physicalAddress, (char*)val+i, 1);
     }
@@ -369,11 +369,12 @@ void GetVal(void *va, void *val, int size) {
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i);
 
-        printf("Val:    %u\n", (char*)val+i);
+        //printf("GetVal:    %u\n", (char*)val+i);
+
         //setting value located at physicalAddress to val
         memcpy((char*)val+i, physicalAddress, 1);
     }
-    printf("Get value done\n");
+    //printf("Get value done\n");
 }
 
 
