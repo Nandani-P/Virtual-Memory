@@ -227,7 +227,6 @@ int get_next_avail_va(int num_pages) {
             }
             printf("Virtual address inside get_next_avail_va: %d\n", i);
             return i;      
-
         }
     }
     return -1;
@@ -280,9 +279,13 @@ void *myalloc(unsigned int num_bytes) {
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
     unsigned int va_int = pgDirEntryNumber;
 
-    int firstTenbitsVA = va_int >> (offsetLength + innerLength);
-    int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
-    int offset = ((1 << offsetLength) - 1)  &  (va_int);
+    // int firstTenbitsVA = va_int >> (offsetLength + innerLength);
+    // int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
+    // int offset = ((1 << offsetLength) - 1)  &  (va_int);
+
+    va_int = va_int <<  innerLength;
+    va_int = va_int | pgTableEntryNumberInBlock;
+    va_int = va_int << offsetLength;  
  
     void *va = va_int;
 
