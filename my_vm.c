@@ -438,11 +438,11 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
                sum=0;
                for(int k=0;k<size;k++)
                {
-                 GetVal((void *)(mat1+(i*size)+k), &x, sizeof(int));
-                 GetVal((void *)(mat2+(k*size)+j), &y, sizeof(int));
+                 GetVal((void *)(mat1+(i*size * sizeof(int))+(k* sizeof(int))), &x, sizeof(int));
+                 GetVal((void *)(mat2+(k*size* sizeof(int))+(j* sizeof(int))), &y, sizeof(int));
                  sum+= x * y;
                }
-            PutVal((void *)(answer+(i*10)+j), &sum, sizeof(int));
+            PutVal((void *)(answer+(i*size * sizeof(int))+(j* sizeof(int))), &sum, sizeof(int));
             
             }
         }
