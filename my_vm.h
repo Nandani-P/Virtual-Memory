@@ -26,6 +26,9 @@ typedef void *pte_t;
 //typedef unsigned long pde_t;
 typedef pte_t* pde_t;
 
+const int innerLength = floor((32 - log2(PGSIZE))/2);
+const int outerLength = ceil((32 - log2(PGSIZE))/2);
+const int offsetLength = log2(PGSIZE);
 
 
 #define TLB_SIZE 120

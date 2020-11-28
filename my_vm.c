@@ -290,9 +290,6 @@ void *myalloc(unsigned int num_bytes) {
     // calculate 32- bit VA
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
    unsigned int va_int = pgDirEntryNumber;
-   const int innerLength = floor((32 - log2(PGSIZE))/2);
-   const int outerLength = ceil((32 - log2(PGSIZE))/2);
-   const int offsetLength = log2(PGSIZE);
 
    int firstTenbitsVA = va_int >> (offsetLength + innerLength);
    int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
