@@ -132,7 +132,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
 
         // adding offset to PA
         pa = (char*) pa + lastTwelvebitsVA;
-        printf("PA in Translate: %p\n", pa);
+        printf("PA in Translate: %u\n", pa);
         return pa;
     }
         
@@ -356,6 +356,7 @@ void PutVal(void *va, void *val, int size) {
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
         printf("After translate\n");
+        printf("Val:    %u\n", (char*)val+i);
         //setting value to a address(physicalAddress) 
         memcpy(physicalAddress, (char*)val+i, 1);
     }
