@@ -354,11 +354,13 @@ void PutVal(void *va, void *val, int size) {
        function.*/
 
     printf("Put value\n");
-    int num_pages = size/PGSIZE;
-    if (size % PGSIZE != 0){
-        num_pages = num_pages + 1; 
-    }
-    printf("Put value 2\n");
+
+    // int num_pages = size/PGSIZE;
+    // if (size % PGSIZE != 0){
+    //     num_pages = num_pages + 1; 
+    // }
+    // printf("Put value 2\n");
+
     pte_t * physicalAddress;
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
@@ -378,16 +380,19 @@ void GetVal(void *va, void *val, int size) {
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
     printf("Get value\n");
-    int num_pages = size/PGSIZE;
-    if (size % PGSIZE != 0){
-        num_pages = num_pages + 1; 
-    }
-    printf("Get value 2 \n");
+    // int num_pages = size/PGSIZE;
+    // if (size % PGSIZE != 0){
+    //     num_pages = num_pages + 1; 
+    // }
+    // printf("Get value 2 \n");
+
     pte_t * physicalAddress;
-    for (int i = 0; i < num_pages; i++) {
-        physicalAddress = Translate(NULL, va + (PGSIZE * i));
+    for (int i = 0; i < size; i++) {
+        physicalAddress = Translate(NULL, (char*) va + i);
+
+        printf("Val:    %u\n", (char*)val+i);
         //setting value located at physicalAddress to val
-        memcpy((char*)val+(PGSIZE * i), physicalAddress, PGSIZE);
+        memcpy((char*)val+i, physicalAddress, 1);
     }
     printf("Get value done\n");
 }
