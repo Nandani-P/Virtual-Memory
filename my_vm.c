@@ -14,9 +14,9 @@ bool* virtualCheckFree;
 int pageTableEntriesPerBlock = 1024;
 int* outerPageTable[1024];      //pde_t 
 
- int innerLength ;
- int outerLength ;
- int offsetLength;
+int innerLength ;
+int outerLength ;
+int offsetLength;
 int tlb_hit = 0;
 int tlb_miss = 0;
 void* tlb[TLB_SIZE][2];
@@ -257,7 +257,6 @@ int get_next_avail_va(int num_pages) {
             }
             printf("Virtual address inside get_next_avail_va: %d\n", i);
             return i;      
-
         }
     }
     return -1;
@@ -310,9 +309,13 @@ void *myalloc(unsigned int num_bytes) {
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
     unsigned int va_int = pgDirEntryNumber;
 
-    int firstTenbitsVA = va_int >> (offsetLength + innerLength);
-    int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
-    int offset = ((1 << offsetLength) - 1)  &  (va_int);
+    // va_int = va_int << 10;
+    // va_int = va_int | pgTableEntryNumberInBlock;
+    // va_int = va_int << 12; 
+    
+    va_int = va_int <<  innerLength;
+    va_int = va_int | pgTableEntryNumberInBlock;
+    va_int = va_int << offsetLength;  
  
     void *va = va_int;
 
@@ -379,7 +382,7 @@ void PutVal(void *va, void *val, int size) {
         physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
    //     printf(" physical %ld \n",physicalAddress);
         //printf("After translate\n");
-        //printf("Val:    %u\n", (char*)val+i);
+        printf("PutVal:    %u\n", (char*)val+i);
 
         //setting value to a address(physicalAddress) 
         memcpy(physicalAddress, (char*)val+i, 1);
@@ -400,8 +403,7 @@ void GetVal(void *va, void *val, int size) {
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i);
  //       printf(" physical %ld \n",physicalAddress);
-        //printf("GetVal:    %u\n", (char*)val+i);
-
+        //printf("GetVal:    %u\n", (char*)val+i);      
         //setting value located at physicalAddress to val
         memcpy((char*)val+i, physicalAddress, 1);
     }
