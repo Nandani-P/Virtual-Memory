@@ -1,4 +1,6 @@
 #include "my_vm.h"
+#include <math.h>
+
 void *physicalMemory;
 int numberOfVirtPages;
 int numberOfPhysPages;
@@ -12,10 +14,12 @@ bool* virtualCheckFree;
 int pageTableEntriesPerBlock = 1024;
 int* outerPageTable[1024];      //pde_t 
 
-const int innerLength = floor((32 - log2(PGSIZE))/2);
-const int outerLength = ceil((32 - log2(PGSIZE))/2);
-const int offsetLength = log2(PGSIZE);
-
+ int innerLength ;
+ int outerLength ;
+ int offsetLength;
+int tlb_hit = 0;
+int tlb_miss = 0;
+void* tlb[TLB_SIZE][2];
 /*
 Function responsible for allocating and setting your physical memory
 */
@@ -23,7 +27,10 @@ void SetPhysicalMem() {
 
     //Allocate physical memory using mmap or malloc; this is the total size of
     //your memory you are simulating
-    
+    int innerLength = floor((32 - log2(PGSIZE))/2);
+    int outerLength = ceil((32 - log2(PGSIZE))/2);
+    int offsetLength = log2(PGSIZE);
+
     physicalMemory = (void *) malloc(MEMSIZE);
     initializePhysicalFlag = true;
 
@@ -61,6 +68,16 @@ int add_TLB(void *va, void *pa)
 
     /*Part 2 HINT: Add a virtual to physical page translation to the TLB */
 
+    for (int i = 0; i < TLB_SIZE; i++) {
+        if (tlb[i][0] == NULL){
+            tlb[i][0] = va;
+            tlb[i][0] = pa;
+            return 1;
+        }
+    }
+    int randToEvict = rand() % (TLB_SIZE);
+    tlb[randToEvict][0] = va;
+    tlb[randToEvict][1] = pa;
     return -1;
 }
 
@@ -70,25 +87,27 @@ int add_TLB(void *va, void *pa)
  * Returns the physical page address.
  * Feel free to extend this function and change the return type.
  */
-pte_t *
-check_TLB(void *va) {
+pte_t *check_TLB(void *va) {
 
     /* Part 2: TLB lookup code here */
-
+    for (int i = 0; i < TLB_SIZE; i++) {
+        if (tlb[i][0] == va) {
+            return tlb[i][1];  
+        }
+    return NULL;
+  }
 }
-
 
 /*
  * Part 2: Print TLB miss rate.
  * Feel free to extend the function arguments or return type.
  */
-void
-print_TLB_missrate()
+void print_TLB_missrate()
 {
     double miss_rate = 0;
 
     /*Part 2 Code here to calculate and print the TLB miss rate*/
-
+    miss_rate = tlb_miss / (tlb_miss + tlb_hit);
 
     printf(stderr, "TLB miss rate %lf \n", miss_rate);
 }
@@ -104,6 +123,14 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     //directory index and page table index get the physical address
 
     //printf("Inside translate \n");
+    pte_t* p = check_TLB(va);
+    if(p != NULL){
+        tlb_hit = tlb_hit + 1;
+        return p;
+    }
+    else
+        tlb_miss = tlb_miss + 1;
+
     unsigned int va_int = va; 
 
     int firstTenbitsVA = va_int >> (offsetLength + innerLength);
@@ -120,7 +147,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     if (innerPagetable[addressInnerPgTable] != NULL){
         pa = innerPagetable[addressInnerPgTable];
         //printf("PA in Translate before offset: %u\n", pa);
-
+        add_TLB(va,pa);
         // adding offset to PA
         pa = (char*) pa + offset;
         //printf("PA in Translate after offset: %u\n", pa);
@@ -163,6 +190,9 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     //printf("Address Inner Page Table in PageMap %d\n", addressInnerPgTable);
     if (innerPagetable[addressInnerPgTable] == NULL){
         innerPagetable[addressInnerPgTable] = pa;
+
+        tlb_miss = tlb_miss + 1;
+        add_TLB(va,pa);
         //printf("PA inside PageMap if condition: %u\n", innerPagetable[addressInnerPgTable]);
     }
     return -1;
