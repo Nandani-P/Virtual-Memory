@@ -129,7 +129,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
 
     printf("Address Inner Page Table in Translate %d\n", addressInnerPgTable);
 
-    if (innerPagetable[addressInnerPgTable] == NULL){
+    if (innerPagetable[addressInnerPgTable] != NULL){
         pa = innerPagetable[addressInnerPgTable];
         printf("PA in Translate before: %u\n", pa);
 
