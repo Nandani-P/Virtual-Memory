@@ -37,7 +37,7 @@ int main() {
     //GetVal((void *)address_a, &y, sizeof(int));
     GetVal((void *)address_a, &y1, sizeof(x1));
     GetVal((void *)address_b, &y2, sizeof(x2));
-    printf("\nValue: %s\n ", y1);
+    printf("\nValue Y1: %s\n ", y1);
     printf("\nValue Y2: %s\n ", y2);
     //printf("\n");
     

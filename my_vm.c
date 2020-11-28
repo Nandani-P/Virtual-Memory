@@ -274,7 +274,7 @@ void *myalloc(unsigned int num_bytes) {
     int pgDirEntryNumber;
     pgDirEntryNumber = va_EntryNumber / pageTableEntriesPerBlock; 
 
-    //int pgTableEntryNumberInBlock = va_EntryNumber % pageTableEntriesPerBlock; 
+    int pgTableEntryNumberInBlock = va_EntryNumber % pageTableEntriesPerBlock; 
 
     // calculate 32- bit VA
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
