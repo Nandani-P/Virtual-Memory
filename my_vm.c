@@ -15,6 +15,10 @@ unsigned int lastTwelveBitsMask = 4095;
 int pageTableEntriesPerBlock = 1024;
 int* outerPageTable[1024];      //pde_t 
 
+const int innerLength = floor((32 - log2(PGSIZE))/2);
+const int outerLength = ceil((32 - log2(PGSIZE))/2);
+const int offsetLength = log2(PGSIZE);
+
 /*
 Function responsible for allocating and setting your physical memory
 */
@@ -298,7 +302,6 @@ void *myalloc(unsigned int num_bytes) {
    printf("S VA initial 10 bits: %d\n", firstTenbitsVA);
    printf("S VA next 10 bits: %d\n", nextTenbitsVA);
    printf("S offset %d\n", offset);
-
 
     // unsigned int va_int = pgDirEntryNumber;
     // va_int = va_int << 10;
