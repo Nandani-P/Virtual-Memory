@@ -162,7 +162,7 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     unsigned int va_int = va; 
     unsigned int firstTenbitsVA = va_int >> 22;
     if (outerPageTable[firstTenbitsVA] == NULL){
-        outerPageTable[firstTenbitsVA] == pgdir;
+        outerPageTable[firstTenbitsVA] = pgdir;
     }
 
     unsigned int pgdir_int = pgdir;
@@ -171,7 +171,7 @@ PageMap(pde_t *pgdir, void *va, void *pa)
 
     printf("Address Inner Page Table in PageMap %d\n", addressInnerPgTable);
     if (innerPagetable[addressInnerPgTable] == NULL){
-        innerPagetable[addressInnerPgTable] == pa;
+        innerPagetable[addressInnerPgTable] = pa;
     }
 
     return -1;
