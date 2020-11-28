@@ -172,6 +172,7 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     printf("Address Inner Page Table in PageMap %d\n", addressInnerPgTable);
     if (innerPagetable[addressInnerPgTable] == NULL){
         innerPagetable[addressInnerPgTable] = pa;
+         printf("PA inside PageMap if condition: %u\n", innerPagetable[addressInnerPgTable]);
     }
 
     return -1;
