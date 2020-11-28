@@ -10,8 +10,8 @@ bool* physicalCheckFree;
 bool* virtualCheckFree;
 
 //int tukdetukde = numberOfVirtPages*sizeof(int)/(PGSIZE);
-unsigned int secondTenBitsMask = 4190208;
-unsigned int lastTwelveBitsMask = 4095;
+// unsigned int secondTenBitsMask = 4190208;
+// unsigned int lastTwelveBitsMask = 4095;
 int pageTableEntriesPerBlock = 1024;
 int* outerPageTable[1024];      //pde_t 
 
@@ -122,14 +122,19 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     //directory index and page table index get the physical address
     printf("Inside translate \n");
     unsigned int va_int = va; 
-    unsigned int firstTenbitsVA = va_int >> 22;
+
+    int firstTenbitsVA = va_int >> (offsetLength + innerLength);
+    
+    int offset = ((1 << offsetLength) - 1)  &  (va_int);
+    //unsigned int firstTenbitsVA = va_int >> 22;
     int pgdirVal = outerPageTable[firstTenbitsVA];
     pte_t *pa;
-        
-    unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
+     
+    int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));    
+    //unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
     int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
 
-    unsigned int lastTwelvebitsVA = va_int & lastTwelveBitsMask;
+    //unsigned int lastTwelvebitsVA = va_int & lastTwelveBitsMask;
 
     printf("Address Inner Page Table in Translate %d\n", addressInnerPgTable);
 
@@ -138,7 +143,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
         printf("PA in Translate before: %u\n", pa);
 
         // adding offset to PA
-        pa = (char*) pa + lastTwelvebitsVA;
+        pa = (char*) pa + offset;
         printf("PA in Translate After offset: %u\n", pa);
         return pa;
     }
@@ -164,13 +169,17 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     printf("Inside PageMap \n");
     printf("PA inside PageMap %u\n", pa);
     unsigned int va_int = va; 
-    unsigned int firstTenbitsVA = va_int >> 22;
+
+    int firstTenbitsVA = va_int >> (offsetLength + innerLength);
+    //unsigned int firstTenbitsVA = va_int >> 22;
     if (outerPageTable[firstTenbitsVA] == NULL){
         outerPageTable[firstTenbitsVA] = pgdir;
     }
 
     unsigned int pgdir_int = pgdir;
-    unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
+
+    int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));    
+    //unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
     int addressInnerPgTable = (pgdir_int * pageTableEntriesPerBlock) + nextTenbitsVA;
 
     printf("Address Inner Page Table in PageMap %d\n", addressInnerPgTable);
@@ -202,8 +211,6 @@ bool check_require_avail_pa(int num_pages){
 void *get_next_avail_pa(int num_pages) {
 
     //check for free space using physicalCheckFree array of size is equal to physical memory
-    // bool *pFreeAddress;
-    // pFreeAddress = physicalCheckFree;
 
     //Use virtual address bitmap to find the next free page
     for (int i = 0; i < numberOfPhysPages; i++) {     // numberOfFrames = numberOfPhysPages
@@ -293,15 +300,15 @@ void *myalloc(unsigned int num_bytes) {
 
     // calculate 32- bit VA
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
-   unsigned int va_int = pgDirEntryNumber;
+   unsigned va_int = pgDirEntryNumber;
 
    int firstTenbitsVA = va_int >> (offsetLength + innerLength);
    int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
    int offset = ((1 << offsetLength) - 1)  &  (va_int);
 
-   printf("S VA initial 10 bits: %d\n", firstTenbitsVA);
+   /*printf("S VA initial 10 bits: %d\n", firstTenbitsVA);
    printf("S VA next 10 bits: %d\n", nextTenbitsVA);
-   printf("S offset %d\n", offset);
+   printf("S offset %d\n", offset);*/
 
     // unsigned int va_int = pgDirEntryNumber;
     // va_int = va_int << 10;
@@ -341,10 +348,14 @@ void myfree(void *va, int size) {
         num_pages = num_pages + 1; 
     }
     unsigned int va_int = va; 
-    unsigned int firstTenbitsVA = va_int >> 22;
+
+    int firstTenbitsVA = va_int >> (offsetLength + innerLength);
+   
+    //unsigned int firstTenbitsVA = va_int >> 22;
     int pgdirVal = outerPageTable[firstTenbitsVA];
     
-    unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
+    int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
+    //unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
     int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
 
     for (int i = 0; i < num_pages; i++) {
@@ -368,12 +379,6 @@ void PutVal(void *va, void *val, int size) {
 
     printf("Put value\n");
 
-    // int num_pages = size/PGSIZE;
-    // if (size % PGSIZE != 0){
-    //     num_pages = num_pages + 1; 
-    // }
-    // printf("Put value 2\n");
-
     pte_t * physicalAddress;
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
@@ -393,11 +398,6 @@ void GetVal(void *va, void *val, int size) {
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
     printf("Get value\n");
-    // int num_pages = size/PGSIZE;
-    // if (size % PGSIZE != 0){
-    //     num_pages = num_pages + 1; 
-    // }
-    // printf("Get value 2 \n");
 
     pte_t * physicalAddress;
     for (int i = 0; i < size; i++) {
