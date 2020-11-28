@@ -127,8 +127,11 @@ pte_t * Translate(pde_t *pgdir, void *va) {
 
     unsigned int lastTwelvebitsVA = va_int & lastTwelveBitsMask;
 
+    printf("Address Inner Page Table in Translate %d\n", addressInnerPgTable);
+
     if (innerPagetable[addressInnerPgTable] == NULL){
         pa = innerPagetable[addressInnerPgTable];
+        
 
         // adding offset to PA
         pa = (char*) pa + lastTwelvebitsVA;
