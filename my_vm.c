@@ -11,6 +11,7 @@ bool* virtualCheckFree;
 
 //int tukdetukde = numberOfVirtPages*sizeof(int)/(PGSIZE);
 unsigned int secondTenBitsMask = 4190208;
+unsigned int lastTwelveBitsMask = 4095;
 int pageTableEntriesPerBlock = 1024;
 int* outerPageTable[1024];      //pde_t 
 
@@ -123,8 +124,14 @@ pte_t * Translate(pde_t *pgdir, void *va) {
         
     unsigned int nextTenbitsVA = (va_int & secondTenBitsMask) >> 12;
     int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
+
+    unsigned int lastTwelvebitsVA = va_int & lastTwelveBitsMask;
+
     if (innerPagetable[addressInnerPgTable] == NULL){
         pa = innerPagetable[addressInnerPgTable];
+
+        // adding offset to PA
+        pa = (char*) pa + lastTwelvebitsVA;
         printf("PA in Translate: %p\n", pa);
         return pa;
     }
@@ -281,7 +288,7 @@ void *myalloc(unsigned int num_bytes) {
     va_int = va_int << 12;  // last 12 bits for offset from 32 bit VA
     //unsigned int firstTenBits = 4290772992;
     
-    //int lastTwelveBits = 4095;
+   
     printf("VA initial 10 bits: %u\n", va_int >> 22);
     printf("VA next 10 bits: %u\n", (va_int & secondTenBitsMask)>> 12); 
     void *va = va_int;
@@ -346,15 +353,12 @@ void PutVal(void *va, void *val, int size) {
     }
     printf("Put value 2\n");
     pte_t * physicalAddress;
-    for (int i = 0; i < num_pages; i++) {
-        physicalAddress = Translate(NULL, va + (PGSIZE * i) );  // TO-DO check va 
+    for (int i = 0; i < size; i++) {
+        physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
         printf("After translate\n");
         //setting value to a address(physicalAddress) 
-        memcpy(physicalAddress, (char*)val+(PGSIZE * i), PGSIZE);
-
-
+        memcpy(physicalAddress, (char*)val+i, 1);
     }
-
 }
 
 
