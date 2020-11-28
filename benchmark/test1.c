@@ -13,8 +13,9 @@ int main() {
     //int x = 1;
     //char x1 = 'j';
     char x1[] = "Hello World klfdgdklsjdklklsjklsjklsjgkarjgkjsglksjfgkjdfkljgklfdjgkjhkls end\n";
+
     //int y;
-    char y1[6];
+    char y1[sizeof(x1)];
     int address_a = 0;
    
     printf("Address of the allocation: %x\n", (int)a);
@@ -23,13 +24,13 @@ int main() {
     address_a = (unsigned int)a;
     
     //PutVal((void *)address_a, &x, sizeof(int));
-    PutVal((void *)address_a, &x1, sizeof(char)*6);        
+    PutVal((void *)address_a, &x1, sizeof(x1));        
     printf("Fetching element stored in the integer x\n");
 
     //GetVal((void *)address_a, &y, sizeof(int));
-    GetVal((void *)address_a, &y1, sizeof(char)*6);
-    printf("%s ", y1);
-    printf("\n");
+    GetVal((void *)address_a, &y1, sizeof(x1));
+    printf("\nValue: %s\n ", y1);
+    //printf("\n");
     
 
 
