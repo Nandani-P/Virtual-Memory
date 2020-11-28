@@ -14,9 +14,9 @@ bool* virtualCheckFree;
 int pageTableEntriesPerBlock = 1024;
 int* outerPageTable[1024];      //pde_t 
 
- int innerLength ;
- int outerLength ;
- int offsetLength;
+int innerLength ;
+int outerLength ;
+int offsetLength;
 int tlb_hit = 0;
 int tlb_miss = 0;
 void* tlb[TLB_SIZE][2];
@@ -309,13 +309,13 @@ void *myalloc(unsigned int num_bytes) {
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
     unsigned int va_int = pgDirEntryNumber;
 
-    va_int = va_int << 10;
-    va_int = va_int | pgTableEntryNumberInBlock;
-    va_int = va_int << 12; 
-    
-    // va_int = va_int <<  innerLength;
+    // va_int = va_int << 10;
     // va_int = va_int | pgTableEntryNumberInBlock;
-    // va_int = va_int << offsetLength;  
+    // va_int = va_int << 12; 
+    
+    va_int = va_int <<  innerLength;
+    va_int = va_int | pgTableEntryNumberInBlock;
+    va_int = va_int << offsetLength;  
  
     void *va = va_int;
 
