@@ -9,7 +9,6 @@ int** innerPagetable;       //size of pte_t
 bool* physicalCheckFree;
 bool* virtualCheckFree;
 
-
 int pageTableEntriesPerBlock = 1024;
 int* outerPageTable[1024];      //pde_t 
 
@@ -103,7 +102,8 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     //HINT: Get the Page directory index (1st level) Then get the
     //2nd-level-page table index using the virtual address.  Using the page
     //directory index and page table index get the physical address
-    printf("Inside translate \n");
+
+    //printf("Inside translate \n");
     unsigned int va_int = va; 
 
     int firstTenbitsVA = va_int >> (offsetLength + innerLength);
@@ -115,7 +115,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
        
     int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
 
-    printf("Address Inner Page Table in Translate %d\n", addressInnerPgTable);
+    //printf("Address Inner Page Table in Translate %d\n", addressInnerPgTable);
 
     if (innerPagetable[addressInnerPgTable] != NULL){
         pa = innerPagetable[addressInnerPgTable];
@@ -274,15 +274,15 @@ void *myalloc(unsigned int num_bytes) {
     int pgDirEntryNumber;
     pgDirEntryNumber = va_EntryNumber / pageTableEntriesPerBlock; 
 
-    int pgTableEntryNumberInBlock = va_EntryNumber % pageTableEntriesPerBlock; 
+    //int pgTableEntryNumberInBlock = va_EntryNumber % pageTableEntriesPerBlock; 
 
     // calculate 32- bit VA
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
-    unsigned va_int = pgDirEntryNumber;
+    unsigned int va_int = pgDirEntryNumber;
 
-    int firstTenbitsVA = va_int >> (offsetLength + innerLength);
-    int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
-    int offset = ((1 << offsetLength) - 1)  &  (va_int);
+    // int firstTenbitsVA = va_int >> (offsetLength + innerLength);
+    // int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
+    // int offset = ((1 << offsetLength) - 1)  &  (va_int);
  
     void *va = va_int;
 

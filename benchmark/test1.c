@@ -14,8 +14,8 @@ int main() {
     int old_b = (int)b;
     //int x = 1;
     //char x1 = 'j';
-    char x1[] = "Hello World klfdgdklsjdklklsjklsjklsjgkarjgkjsglksjfgkjdfkljgklfdjgkjhkls end\n";
-    char x2[] = "ewgfrhrhsfkjdgjkdfjkgdfjgjdfnh hello\n";
+    char x1[] = "Operating\n";
+    char x2[] = "Systems Project 3\n";
     //int y;
     char y1[sizeof(x1)];
     char y2[sizeof(x2)];
