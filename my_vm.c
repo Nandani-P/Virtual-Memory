@@ -27,9 +27,9 @@ void SetPhysicalMem() {
 
     //Allocate physical memory using mmap or malloc; this is the total size of
     //your memory you are simulating
-    int innerLength = floor((32 - log2(PGSIZE))/2);
-    int outerLength = ceil((32 - log2(PGSIZE))/2);
-    int offsetLength = log2(PGSIZE);
+    innerLength = floor((32 - log2(PGSIZE))/2);
+    outerLength = ceil((32 - log2(PGSIZE))/2);
+    offsetLength = log2(PGSIZE);
 
     physicalMemory = (void *) malloc(MEMSIZE);
     initializePhysicalFlag = true;
@@ -372,11 +372,12 @@ void PutVal(void *va, void *val, int size) {
        than one page. Therefore, you may have to find multiple pages using Translate()
        function.*/
 
-    printf("Put value\n");
+ //   printf("Put value\n");
 
     pte_t * physicalAddress;
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
+   //     printf(" physical %ld \n",physicalAddress);
         //printf("After translate\n");
         //printf("Val:    %u\n", (char*)val+i);
 
@@ -393,12 +394,12 @@ void GetVal(void *va, void *val, int size) {
     "val" address. Assume you can access "val" directly by derefencing them.
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
-    printf("Get value\n");
+//    printf("Get value\n");
 
     pte_t * physicalAddress;
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i);
-
+ //       printf(" physical %ld \n",physicalAddress);
         //printf("GetVal:    %u\n", (char*)val+i);
 
         //setting value located at physicalAddress to val
@@ -426,11 +427,13 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
             GetVal((void *)address_a, &x, sizeof(int));
             GetVal((void *)address_b, &x, sizeof(int));
         }
-    }
+    }       
 */    
       int x;
       int y;
       int sum = 0;
+      int address_mat1;
+      int address_mat2;
       for(int i=0;i<size;i++)
         {
             for(int j=0;j<size;j++)
@@ -438,11 +441,16 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
                sum=0;
                for(int k=0;k<size;k++)
                {
-                 GetVal((void *)(mat1+(i*size * sizeof(int))+(k* sizeof(int))), &x, sizeof(int));
-                 GetVal((void *)(mat2+(k*size* sizeof(int))+(j* sizeof(int))), &y, sizeof(int));
-                 sum+= x * y;
+           //      GetVal((void *)(mat1+(i*size )+(k)), &x, sizeof(int));
+             //    GetVal((void *)(mat2+(k*size)+(j)), &y, sizeof(int));
+                 address_mat1 = (unsigned int)mat1 + (i*size * sizeof(int))+(k* sizeof(int));
+                 address_mat2 = (unsigned int)mat2 + (k*size * sizeof(int))+(j* sizeof(int));
+                 GetVal((void *)address_mat1, &x, sizeof(int));
+                 GetVal((void *)address_mat2, &y, sizeof(int));
+                 sum+= (x * y);
                }
-            PutVal((void *)(answer+(i*size * sizeof(int))+(j* sizeof(int))), &sum, sizeof(int));
+            //  PutVal((void *)(answer+(i*size)+(j)), &sum, sizeof(int)); 
+             PutVal((void *)((unsigned int) answer+(i*size * sizeof(int))+(j* sizeof(int))), &sum, sizeof(int));
             
             }
         }
