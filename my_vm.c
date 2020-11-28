@@ -289,33 +289,28 @@ void *myalloc(unsigned int num_bytes) {
 
     // calculate 32- bit VA
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
-   unsigned int va_S = pgDirEntryNumber;
+   unsigned int va_int = pgDirEntryNumber;
    const int innerLength = floor((32 - log2(PGSIZE))/2);
    const int outerLength = ceil((32 - log2(PGSIZE))/2);
    const int offsetLength = log2(PGSIZE);
-   
-   printf("%d ", offsetLength);
-   printf("%d ", innerLength);
-   printf("%d ", outerLength);
 
-   int firstTenbitsVA = va_S >> (offsetLength + innerLength);
-   int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_S >> (offsetLength));
-   int offset = ((1 << offsetLength) - 1)  &  (va_S);
+   int firstTenbitsVA = va_int >> (offsetLength + innerLength);
+   int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
+   int offset = ((1 << offsetLength) - 1)  &  (va_int);
 
-   printf("S VA initial 10 bits: %d ", firstTenbitsVA);
-   printf("S VA next 10 bits: %d ", nextTenbitsVA);
-   printf("S offset %d ", offset);
+   printf("S VA initial 10 bits: %d\n", firstTenbitsVA);
+   printf("S VA next 10 bits: %d\n", nextTenbitsVA);
+   printf("S offset %d\n", offset);
 
 
-    unsigned int va_int = pgDirEntryNumber;
-    va_int = va_int << 10;
-    va_int = va_int | pgTableEntryNumberInBlock;
-    va_int = va_int << 12;  // last 12 bits for offset from 32 bit VA
-    //unsigned int firstTenBits = 4290772992;
+    // unsigned int va_int = pgDirEntryNumber;
+    // va_int = va_int << 10;
+    // va_int = va_int | pgTableEntryNumberInBlock;
+    // va_int = va_int << 12;  // last 12 bits for offset from 32 bit VA
+    // //unsigned int firstTenBits = 4290772992;
     
-   
-    printf("VA initial 10 bits: %u\n", va_int >> 22);
-    printf("VA next 10 bits: %u\n", (va_int & secondTenBitsMask)>> 12); 
+    // printf("VA initial 10 bits: %u\n", va_int >> 22);
+    // printf("VA next 10 bits: %u\n", (va_int & secondTenBitsMask)>> 12); 
     void *va = va_int;
 
     pde_t *pgDir = pgDirEntryNumber; // Assuming page directory entry number is same as inner page block number
