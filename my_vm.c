@@ -131,11 +131,11 @@ pte_t * Translate(pde_t *pgdir, void *va) {
 
     if (innerPagetable[addressInnerPgTable] == NULL){
         pa = innerPagetable[addressInnerPgTable];
-
+        printf("PA in Translate before: %u\n", pa);
 
         // adding offset to PA
         pa = (char*) pa + lastTwelvebitsVA;
-        printf("PA in Translate: %u\n", pa);
+        printf("PA in Translate After offset: %u\n", pa);
         return pa;
     }
         
@@ -158,7 +158,7 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     and page table (2nd-level) indices. If no mapping exists, set the
     virtual to physical mapping */
     printf("Inside PageMap \n");
-    printf("PA inside PageMap %d\n", pa);
+    printf("PA inside PageMap %u\n", pa);
     unsigned int va_int = va; 
     unsigned int firstTenbitsVA = va_int >> 22;
     if (outerPageTable[firstTenbitsVA] == NULL){
