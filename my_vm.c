@@ -381,7 +381,7 @@ void PutVal(void *va, void *val, int size) {
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
         //printf("After translate\n");
-        //printf("Val:    %u\n", (char*)val+i);
+        printf("PutVal:    %u\n", (char*)val+i);
 
         //setting value to a address(physicalAddress) 
         memcpy(physicalAddress, (char*)val+i, 1);
@@ -402,7 +402,7 @@ void GetVal(void *va, void *val, int size) {
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i);
 
-        //printf("GetVal:    %u\n", (char*)val+i);
+        printf("GetVal:    %u\n", (char*)val+i);
 
         //setting value located at physicalAddress to val
         memcpy((char*)val+i, physicalAddress, 1);
