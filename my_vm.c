@@ -316,7 +316,8 @@ void *myalloc(unsigned int num_bytes) {
     va_int = va_int <<  innerLength;
     va_int = va_int | pgTableEntryNumberInBlock;
     va_int = va_int << offsetLength;  
- 
+    
+//    printf("va is %d \n",va_int);
     void *va = va_int;
 
     pde_t *pgDir = pgDirEntryNumber; // Assuming page directory entry number is same as inner page block number
@@ -382,7 +383,7 @@ void PutVal(void *va, void *val, int size) {
         physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
    //     printf(" physical %ld \n",physicalAddress);
         //printf("After translate\n");
-        printf("PutVal:    %u\n", (char*)val+i);
+      //  printf("PutVal:    %u\n", (char*)val+i);
 
         //setting value to a address(physicalAddress) 
         memcpy(physicalAddress, (char*)val+i, 1);
@@ -443,15 +444,13 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
                sum=0;
                for(int k=0;k<size;k++)
                {
-           //      GetVal((void *)(mat1+(i*size )+(k)), &x, sizeof(int));
-             //    GetVal((void *)(mat2+(k*size)+(j)), &y, sizeof(int));
+           
                  address_mat1 = (unsigned int)mat1 + (i*size * sizeof(int))+(k* sizeof(int));
                  address_mat2 = (unsigned int)mat2 + (k*size * sizeof(int))+(j* sizeof(int));
                  GetVal((void *)address_mat1, &x, sizeof(int));
                  GetVal((void *)address_mat2, &y, sizeof(int));
                  sum+= (x * y);
                }
-            //  PutVal((void *)(answer+(i*size)+(j)), &sum, sizeof(int)); 
              PutVal((void *)((unsigned int) answer+(i*size * sizeof(int))+(j* sizeof(int))), &sum, sizeof(int));
             
             }
