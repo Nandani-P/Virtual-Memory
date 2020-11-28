@@ -351,6 +351,8 @@ void PutVal(void *va, void *val, int size) {
         printf("After translate\n");
         //setting value to a address(physicalAddress) 
         memcpy(physicalAddress, (char*)val+(PGSIZE * i), PGSIZE);
+
+
     }
 
 }
@@ -363,18 +365,19 @@ void GetVal(void *va, void *val, int size) {
     "val" address. Assume you can access "val" directly by derefencing them.
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
-
+    printf("Get value\n");
     int num_pages = size/PGSIZE;
     if (size % PGSIZE != 0){
         num_pages = num_pages + 1; 
     }
+    printf("Get value 2 \n");
     pte_t * physicalAddress;
     for (int i = 0; i < num_pages; i++) {
         physicalAddress = Translate(NULL, va + (PGSIZE * i));
         //setting value located at physicalAddress to val
         memcpy((char*)val+(PGSIZE * i), physicalAddress, PGSIZE);
     }
-    printf("get value done\n");
+    printf("Get value done\n");
 }
 
 
