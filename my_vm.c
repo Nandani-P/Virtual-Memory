@@ -1,5 +1,5 @@
 #include "my_vm.h"
-#include <math.h>
+
 
 void *physicalMemory;
 int numberOfVirtPages;
@@ -427,5 +427,23 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
             GetVal((void *)address_b, &x, sizeof(int));
         }
     }
-*/
+*/    
+      int x;
+      int y;
+      int sum = 0;
+      for(int i=0;i<size;i++)
+        {
+            for(int j=0;j<size;j++)
+            {
+               sum=0;
+               for(int k=0;k<size;k++)
+               {
+                 GetVal((void *)(mat1+(i*size)+k), &x, sizeof(int));
+                 GetVal((void *)(mat2+(k*size)+j), &y, sizeof(int));
+                 sum+= x * y;
+               }
+            PutVal((void *)(answer+(i*10)+j), &sum, sizeof(int));
+            
+            }
+        }
 }
