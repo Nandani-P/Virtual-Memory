@@ -288,7 +288,25 @@ void *myalloc(unsigned int num_bytes) {
     int pgTableEntryNumberInBlock = va_EntryNumber % pageTableEntriesPerBlock; 
 
     // calculate 32- bit VA
-    //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);  
+    //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
+   unsigned int va_S = pgDirEntryNumber;
+   const int innerLength = floor((32 - log2(PGSIZE))/2);
+   const int outerLength = ceil((32 - log2(PGSIZE))/2);
+   const int offsetLength = log2(PGSIZE);
+   
+   printf("%d ", offsetLength);
+   printf("%d ", innerLength);
+   printf("%d ", outerLength);
+
+   int firstTenbitsVA = va_S >> (offsetLength + innerLength);
+   int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_S >> (offsetLength));
+   int offset = ((1 << offsetLength) - 1)  &  (va_S);
+
+   printf("S VA initial 10 bits: %d ", firstTenbitsVA);
+   printf("S VA next 10 bits: %d ", nextTenbitsVA);
+   printf("S offset %d ", offset);
+
+
     unsigned int va_int = pgDirEntryNumber;
     va_int = va_int << 10;
     va_int = va_int | pgTableEntryNumberInBlock;
