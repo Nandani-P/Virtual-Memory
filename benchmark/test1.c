@@ -43,7 +43,7 @@ int main() {
     
 
 
-    /*printf("Freeing the allocations!\n");
+    printf("Freeing the allocations!\n");
     //printf("%d\n", a );
     myfree(a, 100*4);
    
@@ -57,7 +57,7 @@ int main() {
     else
     {
         printf("free function does not work\n");
-    }*/
+    }
 
     return 0;
 }
