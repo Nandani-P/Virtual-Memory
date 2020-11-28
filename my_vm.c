@@ -280,9 +280,9 @@ void *myalloc(unsigned int num_bytes) {
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
     unsigned int va_int = pgDirEntryNumber;
 
-    // int firstTenbitsVA = va_int >> (offsetLength + innerLength);
-    // int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
-    // int offset = ((1 << offsetLength) - 1)  &  (va_int);
+    int firstTenbitsVA = va_int >> (offsetLength + innerLength);
+    int nextTenbitsVA = ((1 << innerLength) - 1)  &  (va_int >> (offsetLength));
+    int offset = ((1 << offsetLength) - 1)  &  (va_int);
  
     void *va = va_int;
 
