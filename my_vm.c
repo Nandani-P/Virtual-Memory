@@ -115,6 +115,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     //HINT: Get the Page directory index (1st level) Then get the
     //2nd-level-page table index using the virtual address.  Using the page
     //directory index and page table index get the physical address
+    printf("Inside translate \n");
     unsigned int va_int = va; 
     unsigned int firstTenbitsVA = va_int >> 22;
     int pgdirVal = outerPageTable[firstTenbitsVA];
@@ -124,6 +125,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
     if (innerPagetable[addressInnerPgTable] == NULL){
         pa = innerPagetable[addressInnerPgTable];
+        printf("PA in Translate: %p\n", pa);
         return pa;
     }
         
@@ -145,6 +147,7 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     /*HINT: Similar to Translate(), find the page directory (1st level)
     and page table (2nd-level) indices. If no mapping exists, set the
     virtual to physical mapping */
+    printf("Inside PageMap \n");
     unsigned int va_int = va; 
     unsigned int firstTenbitsVA = va_int >> 22;
     if (outerPageTable[firstTenbitsVA] == NULL){
@@ -341,9 +344,11 @@ void PutVal(void *va, void *val, int size) {
     if (size % PGSIZE != 0){
         num_pages = num_pages + 1; 
     }
+    printf("Put value 2\n");
     pte_t * physicalAddress;
     for (int i = 0; i < num_pages; i++) {
         physicalAddress = Translate(NULL, va + (PGSIZE * i) );  // TO-DO check va 
+        printf("After translate\n");
         //setting value to a address(physicalAddress) 
         memcpy(physicalAddress, (char*)val+(PGSIZE * i), PGSIZE);
     }
