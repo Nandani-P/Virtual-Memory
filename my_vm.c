@@ -26,20 +26,23 @@ void SetPhysicalMem() {
 
     //Allocate physical memory using mmap or malloc; this is the total size of
     //your memory you are simulating
+    int i;
     innerLength = floor((32 - log2(PGSIZE))/2);
     outerLength = ceil((32 - log2(PGSIZE))/2);
     offsetLength = log2(PGSIZE);
 
     physicalMemory = (void *) malloc(MEMSIZE);
     initializePhysicalFlag = true;
-
+    for (i = 0; i < TLB_SIZE; i++) {
+            tlb[i][0] = NULL;
+            tlb[i][1] = NULL;
+    }
     //HINT: Also calculate the number of physical and virtual pages and allocate
     //virtual and physical bitmaps and initialize them
 
     numberOfVirtPages = MAX_MEMSIZE/ PGSIZE;
     numberOfPhysPages = MEMSIZE/ PGSIZE; 
 
-    int i;
     innerPagetable = malloc(numberOfVirtPages*sizeof(int*));
     for(i = 0; i<numberOfVirtPages; ++i){
         innerPagetable[i] = NULL;
@@ -66,18 +69,20 @@ int add_TLB(void *va, void *pa)
 {
 
     /*Part 2 HINT: Add a virtual to physical page translation to the TLB */
+    unsigned int va_int = va; 
+    int va_no = va_int >> offsetLength;
 
     for (int i = 0; i < TLB_SIZE; i++) {
         if (tlb[i][0] == NULL){
-            tlb[i][0] = va;
-            tlb[i][0] = pa;
+            tlb[i][0] = va_no;
+            tlb[i][1] = pa;
             return 1;
         }
     }
     int randToEvict = rand() % (TLB_SIZE);
-    tlb[randToEvict][0] = va;
+    tlb[randToEvict][0] = va_no;
     tlb[randToEvict][1] = pa;
-    return -1;
+    return 1;
 }
 
 
@@ -87,10 +92,12 @@ int add_TLB(void *va, void *pa)
  * Feel free to extend this function and change the return type.
  */
 pte_t *check_TLB(void *va) {
-
     /* Part 2: TLB lookup code here */
+     unsigned int va_int = va;
+    int va_no = va_int >> offsetLength;
     for (int i = 0; i < TLB_SIZE; i++) {
-        if (tlb[i][0] == va) {
+        if (tlb[i][0] == va_no) {
+           // printf("Tlb match occured");
             return tlb[i][1];  
         }
     return NULL;
@@ -120,16 +127,6 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     //HINT: Get the Page directory index (1st level) Then get the
     //2nd-level-page table index using the virtual address.  Using the page
     //directory index and page table index get the physical address
-
-    //printf("Inside translate \n");
-    pte_t* p = check_TLB(va);
-    if(p != NULL){
-        tlb_hit = tlb_hit + 1;
-        return p;
-    }
-    else
-        tlb_miss = tlb_miss + 1;
-
     unsigned int va_int = va; 
 
     int firstTenbitsVA = va_int >> (offsetLength + innerLength);
@@ -138,7 +135,15 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     
     int pgdirVal = outerPageTable[firstTenbitsVA];
     pte_t *pa;
-       
+   
+    pte_t* p = check_TLB(va);
+    if(p != NULL){
+        tlb_hit = tlb_hit + 1;
+	return ((char*) p + offset);
+    }
+    else
+        tlb_miss = tlb_miss + 1;
+
     int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
 
     //printf("Address Inner Page Table in Translate %d\n", addressInnerPgTable);
@@ -154,6 +159,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     }
         
    //If translation not successfull
+    printf("Translation failed");
     return NULL;
 }
 
@@ -171,7 +177,6 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     /*HINT: Similar to Translate(), find the page directory (1st level)
     and page table (2nd-level) indices. If no mapping exists, set the
     virtual to physical mapping */
-    printf("Inside PageMap \n");
     printf("PA inside PageMap %u\n", pa);
     unsigned int va_int = va; 
 
@@ -312,7 +317,6 @@ void *myalloc(unsigned int num_bytes) {
     va_int = va_int | pgTableEntryNumberInBlock;
     va_int = va_int << offsetLength;  
     
-//    printf("va is %d \n",va_int);
     void *va = va_int;
 
     pde_t *pgDir = pgDirEntryNumber; // Assuming page directory entry number is same as inner page block number
@@ -327,7 +331,7 @@ void *myalloc(unsigned int num_bytes) {
         }
         PageMap(pgDir, va, pa);
     }
-    return va;
+    return va_int;
 }
 
 /* Responsible for releasing one or more memory pages using virtual address (va)
@@ -423,9 +427,10 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
     store the result to the "answer array"*/   
       int x;
       int y;
-      int sum = 0;
-      int address_mat1;
-      int address_mat2;
+      int sum;
+      unsigned int address_mat1;
+      unsigned int address_mat2;
+      unsigned int address_ans;
       for(int i=0;i<size;i++)
         {
             for(int j=0;j<size;j++)
@@ -438,10 +443,10 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
                  address_mat2 = (unsigned int)mat2 + (k*size * sizeof(int))+(j* sizeof(int));
                  GetVal((void *)address_mat1, &x, sizeof(int));
                  GetVal((void *)address_mat2, &y, sizeof(int));
-                 sum+= (x * y);
+		         sum+= (x * y);
                }
-             PutVal((void *)((unsigned int) answer+(i*size * sizeof(int))+(j* sizeof(int))), &sum, sizeof(int));
-            
+            address_ans = (unsigned int) answer+(i*size * sizeof(int))+(j* sizeof(int));
+            PutVal((void *)address_ans, &sum, sizeof(int)); 
             }
         }
 }
