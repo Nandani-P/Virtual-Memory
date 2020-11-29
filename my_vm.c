@@ -6,13 +6,12 @@ int numberOfVirtPages;
 int numberOfPhysPages;
 bool initializePhysicalFlag = false;
 
-//TO-DO 1 Initialize following in the SetPhysicalMem() using bitmap
 int** innerPagetable;       //size of pte_t
 bool* physicalCheckFree;
 bool* virtualCheckFree;
 
 int pageTableEntriesPerBlock = 1024;
-int* outerPageTable[1024];      //pde_t 
+int* outerPageTable[1024];      //initialize outerpage table inside SetPhysicalMem() without hardcode
 
 int innerLength ;
 int outerLength ;
@@ -226,7 +225,7 @@ void *get_next_avail_pa(int num_pages) {
 
             // printf("PA Free Flag: %d\n", i); 
             // printf("PA Free Flag: %u\n", physicalMemory + i*PGSIZE);   
-            return physicalMemory + i*PGSIZE;     //Have to test
+            return physicalMemory + i*PGSIZE;     
         }
     }
     return NULL;
@@ -294,7 +293,7 @@ void *myalloc(unsigned int num_bytes) {
     printf("Searching for virtual memory\n");
 
     int va_EntryNumber;
-    va_EntryNumber = get_next_avail_va(num_pages);   // check null condition in pointer
+    va_EntryNumber = get_next_avail_va(num_pages);  
     if (va_EntryNumber == -1){
         printf("virtual memory is not available\n");
         return NULL;
@@ -322,7 +321,7 @@ void *myalloc(unsigned int num_bytes) {
     for (int i = 0; i < num_pages; i++) {
 
         //checking for next free pages and getting the physical address of that page.
-        pa = get_next_avail_pa(num_pages);   // check null condition in pointer
+        pa = get_next_avail_pa(num_pages);   
         if (pa == NULL){
            printf("This should never happen\n");
         }
@@ -376,7 +375,7 @@ void PutVal(void *va, void *val, int size) {
 
     pte_t * physicalAddress;
     for (int i = 0; i < size; i++) {
-        physicalAddress = Translate(NULL, (char*) va + i );  // TO-DO check va 
+        physicalAddress = Translate(NULL, (char*) va + i );  
    //     printf(" physical %ld \n",physicalAddress);
         //printf("After translate\n");
       //  printf("PutVal:    %u\n", (char*)val+i);
@@ -400,7 +399,8 @@ void GetVal(void *va, void *val, int size) {
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i);
  //       printf(" physical %ld \n",physicalAddress);
-        //printf("GetVal:    %u\n", (char*)val+i);      
+        //printf("GetVal:    %u\n", (char*)val+i); 
+             
         //setting value located at physicalAddress to val
         memcpy((char*)val+i, physicalAddress, 1);
     }
@@ -420,14 +420,7 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
     matrix accessed. Similar to the code in test.c, you will use GetVal() to
     load each element and perform multiplication. Take a look at test.c! In addition to
     getting the values from two matrices, you will perform multiplication and
-    store the result to the "answer array"*/
-/*for (i = 0; i < SIZE; i++) {
-        for (j = 0; j < SIZE; j++) {
-            GetVal((void *)address_a, &x, sizeof(int));
-            GetVal((void *)address_b, &x, sizeof(int));
-        }
-    }       
-*/    
+    store the result to the "answer array"*/   
       int x;
       int y;
       int sum = 0;
