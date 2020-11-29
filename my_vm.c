@@ -308,11 +308,7 @@ void *myalloc(unsigned int num_bytes) {
     // calculate 32- bit VA
     //void * innerPageTableEntryAddr = innerPagetable + va_EntryNumber*sizeof(int);
     unsigned int va_int = pgDirEntryNumber;
-
-    // va_int = va_int << 10;
-    // va_int = va_int | pgTableEntryNumberInBlock;
-    // va_int = va_int << 12; 
-    
+  
     va_int = va_int <<  innerLength;
     va_int = va_int | pgTableEntryNumberInBlock;
     va_int = va_int << offsetLength;  
