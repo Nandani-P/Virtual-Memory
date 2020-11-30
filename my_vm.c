@@ -1,5 +1,5 @@
 #include "my_vm.h"
-
+#include <math.h>
 
 void *physicalMemory;
 int numberOfVirtPages;
@@ -10,15 +10,16 @@ int** innerPagetable;       //size of pte_t
 bool* physicalCheckFree;
 bool* virtualCheckFree;
 
-int pageTableEntriesPerBlock = 1024;
-int* outerPageTable[1024];      //initialize outerpage table inside SetPhysicalMem() without hardcode
-
+int pageTableEntriesPerBlock;
+//int* outerPageTable[(int)pow(2,ceil((32 - log2(PGSIZE))/2))];      //initialize outerpage table inside SetPhysicalMem() without hardcode
+int* outerPageTable;
 int innerLength ;
 int outerLength ;
 int offsetLength;
 int tlb_hit = 0;
 int tlb_miss = 0;
 void* tlb[TLB_SIZE][2];
+pthread_mutex_t function_mutex;
 /*
 Function responsible for allocating and setting your physical memory
 */
@@ -26,13 +27,22 @@ void SetPhysicalMem() {
 
     //Allocate physical memory using mmap or malloc; this is the total size of
     //your memory you are simulating
+    pthread_mutex_lock(&function_mutex);
     int i;
+   
     innerLength = floor((32 - log2(PGSIZE))/2);
     outerLength = ceil((32 - log2(PGSIZE))/2);
     offsetLength = log2(PGSIZE);
-
+    
+    pageTableEntriesPerBlock = (int)pow(2,innerLength);
+    outerPageTable = (int*) malloc((int)pow(2,outerLength) * sizeof(int));
     physicalMemory = (void *) malloc(MEMSIZE);
     initializePhysicalFlag = true;
+    
+    for (i = 0; i < (int)pow(2,outerLength); i++) {
+            outerPageTable[i] =  NULL;
+    }
+
     for (i = 0; i < TLB_SIZE; i++) {
             tlb[i][0] = NULL;
             tlb[i][1] = NULL;
@@ -57,7 +67,7 @@ void SetPhysicalMem() {
     for(i = 0; i<numberOfVirtPages; ++i){
         virtualCheckFree[i] = true;
     }
-
+   pthread_mutex_unlock(&function_mutex);
 }
 
 
@@ -69,6 +79,7 @@ int add_TLB(void *va, void *pa)
 {
 
     /*Part 2 HINT: Add a virtual to physical page translation to the TLB */
+    pthread_mutex_lock(&function_mutex);
     unsigned int va_int = va; 
     int va_no = va_int >> offsetLength;
 
@@ -82,6 +93,7 @@ int add_TLB(void *va, void *pa)
     int randToEvict = rand() % (TLB_SIZE);
     tlb[randToEvict][0] = va_no;
     tlb[randToEvict][1] = pa;
+    pthread_mutex_unlock(&function_mutex);
     return 1;
 }
 
@@ -93,15 +105,18 @@ int add_TLB(void *va, void *pa)
  */
 pte_t *check_TLB(void *va) {
     /* Part 2: TLB lookup code here */
+    pthread_mutex_lock(&function_mutex);
      unsigned int va_int = va;
     int va_no = va_int >> offsetLength;
     for (int i = 0; i < TLB_SIZE; i++) {
         if (tlb[i][0] == va_no) {
            // printf("Tlb match occured");
+	    pthread_mutex_unlock(&function_mutex);
             return tlb[i][1];  
         }
-    return NULL;
   }
+    pthread_mutex_unlock(&function_mutex);
+    return NULL;
 }
 
 /*
@@ -110,12 +125,13 @@ pte_t *check_TLB(void *va) {
  */
 void print_TLB_missrate()
 {
+    pthread_mutex_lock(&function_mutex);
     double miss_rate = 0;
-
     /*Part 2 Code here to calculate and print the TLB miss rate*/
-    miss_rate = tlb_miss / (tlb_miss + tlb_hit);
-
-    printf(stderr, "TLB miss rate %lf \n", miss_rate);
+    miss_rate = (double)tlb_miss / (tlb_miss + tlb_hit);
+    printf(" TLB miss and hit %d %d ",tlb_miss,tlb_hit);
+    printf("TLB miss rate %lf \n", miss_rate);
+    pthread_mutex_unlock(&function_mutex);
 }
 
 
@@ -127,6 +143,8 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     //HINT: Get the Page directory index (1st level) Then get the
     //2nd-level-page table index using the virtual address.  Using the page
     //directory index and page table index get the physical address
+
+    pthread_mutex_lock(&function_mutex);
     unsigned int va_int = va; 
 
     int firstTenbitsVA = va_int >> (offsetLength + innerLength);
@@ -139,6 +157,7 @@ pte_t * Translate(pde_t *pgdir, void *va) {
     pte_t* p = check_TLB(va);
     if(p != NULL){
         tlb_hit = tlb_hit + 1;
+	pthread_mutex_unlock(&function_mutex);
 	return ((char*) p + offset);
     }
     else
@@ -146,20 +165,18 @@ pte_t * Translate(pde_t *pgdir, void *va) {
 
     int addressInnerPgTable = pgdirVal *pageTableEntriesPerBlock + nextTenbitsVA;
 
-    //printf("Address Inner Page Table in Translate %d\n", addressInnerPgTable);
-
     if (innerPagetable[addressInnerPgTable] != NULL){
         pa = innerPagetable[addressInnerPgTable];
-        //printf("PA in Translate before offset: %u\n", pa);
         add_TLB(va,pa);
         // adding offset to PA
         pa = (char*) pa + offset;
-        //printf("PA in Translate after offset: %u\n", pa);
-        return pa;
+        pthread_mutex_unlock(&function_mutex);
+	return pa;
     }
         
    //If translation not successfull
     printf("Translation failed");
+    pthread_mutex_unlock(&function_mutex);
     return NULL;
 }
 
@@ -177,7 +194,8 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     /*HINT: Similar to Translate(), find the page directory (1st level)
     and page table (2nd-level) indices. If no mapping exists, set the
     virtual to physical mapping */
-    printf("PA inside PageMap %u\n", pa);
+    pthread_mutex_lock(&function_mutex);
+    printf("Inside PageMap \n");
     unsigned int va_int = va; 
 
     int firstTenbitsVA = va_int >> (offsetLength + innerLength);
@@ -191,28 +209,30 @@ PageMap(pde_t *pgdir, void *va, void *pa)
     
     int addressInnerPgTable = (pgdir_int * pageTableEntriesPerBlock) + nextTenbitsVA;
 
-    //printf("Address Inner Page Table in PageMap %d\n", addressInnerPgTable);
     if (innerPagetable[addressInnerPgTable] == NULL){
         innerPagetable[addressInnerPgTable] = pa;
 
         tlb_miss = tlb_miss + 1;
         add_TLB(va,pa);
-        //printf("PA inside PageMap if condition: %u\n", innerPagetable[addressInnerPgTable]);
     }
+    pthread_mutex_unlock(&function_mutex);
     return -1;
 }
 
 bool check_require_avail_pa(int num_pages){
+    pthread_mutex_lock(&function_mutex);
     int havePageCounter = 0;
     for (int i = 0; i < numberOfPhysPages; i++) {  
         if (physicalCheckFree[i] == true){
             havePageCounter++; 
 
             if (havePageCounter == num_pages){
+		pthread_mutex_unlock(&function_mutex);
                 return true; 
             }
         }
     }
+    pthread_mutex_unlock(&function_mutex);
     return false;
 }
 
@@ -224,22 +244,23 @@ void *get_next_avail_pa(int num_pages) {
     //check for free space using physicalCheckFree array of size is equal to physical memory
 
     //Use virtual address bitmap to find the next free page
-    for (int i = 0; i < numberOfPhysPages; i++) {     
+     pthread_mutex_lock(&function_mutex);
+     for (int i = 0; i < numberOfPhysPages; i++) {     
         if (physicalCheckFree[i] == true){
             physicalCheckFree[i] = false;
-
-            // printf("PA Free Flag: %d\n", i); 
-            // printf("PA Free Flag: %u\n", physicalMemory + i*PGSIZE);   
+            pthread_mutex_unlock(&function_mutex);
             return physicalMemory + i*PGSIZE;     
         }
     }
+    pthread_mutex_unlock(&function_mutex);
     return NULL;
 }
 
 int get_next_avail_va(int num_pages) {
 
     //Use virtual address bitmap to find the next free page
-    for (int i = 0; i < (numberOfVirtPages - num_pages); i++) {     
+     pthread_mutex_lock(&function_mutex);
+     for (int i = 0; i < (numberOfVirtPages - num_pages); i++) {     
         if (virtualCheckFree[i] == true){
             printf("Inside get_next_avail_va if condition\n");
             bool haveContinuousPages = true;
@@ -251,7 +272,6 @@ int get_next_avail_va(int num_pages) {
             }
 
             if (!haveContinuousPages){
-                // find next
                 continue;
             }
 
@@ -260,9 +280,11 @@ int get_next_avail_va(int num_pages) {
                     
             }
             printf("Virtual address inside get_next_avail_va: %d\n", i);
+	    pthread_mutex_unlock(&function_mutex);
             return i;      
         }
     }
+    pthread_mutex_unlock(&function_mutex);
     return -1;
 }
 /* Function responsible for allocating pages
@@ -271,6 +293,8 @@ and used by the benchmark
 void *myalloc(unsigned int num_bytes) {
 
     //HINT: If the physical memory is not yet initialized, then allocate and initialize.
+    pthread_mutex_lock(&function_mutex);
+
     if (initializePhysicalFlag == false)
     {
         SetPhysicalMem();
@@ -292,6 +316,7 @@ void *myalloc(unsigned int num_bytes) {
     
     if (check_require_avail_pa(num_pages) == false){
         printf("Physical memory not found\n");
+	pthread_mutex_unlock(&function_mutex);
         return NULL;
     }
 
@@ -301,6 +326,7 @@ void *myalloc(unsigned int num_bytes) {
     va_EntryNumber = get_next_avail_va(num_pages);  
     if (va_EntryNumber == -1){
         printf("virtual memory is not available\n");
+	pthread_mutex_unlock(&function_mutex);
         return NULL;
     }
     
@@ -330,7 +356,10 @@ void *myalloc(unsigned int num_bytes) {
            printf("This should never happen\n");
         }
         PageMap(pgDir, va, pa);
+	    va = va + PGSIZE;
     }
+    printf("va is %d \n",va_int);
+    pthread_mutex_unlock(&function_mutex);
     return va_int;
 }
 
@@ -342,6 +371,7 @@ void myfree(void *va, int size) {
     // Also mark the pages free in the bitmap
     //Only free if the memory from "va" to va+size is valid
     //free(va);
+    pthread_mutex_lock(&function_mutex);
     printf("My Free started\n");
     int num_pages = size/PGSIZE;
     if (size % PGSIZE != 0){
@@ -362,6 +392,7 @@ void myfree(void *va, int size) {
         physicalCheckFree[(pa - physicalMemory)/PGSIZE] = true;
         virtualCheckFree[addressInnerPgTable + i] = true;  
     }
+    pthread_mutex_unlock(&function_mutex);
 }
 
 
@@ -376,17 +407,14 @@ void PutVal(void *va, void *val, int size) {
        function.*/
 
  //   printf("Put value\n");
-
+    pthread_mutex_lock(&function_mutex);
     pte_t * physicalAddress;
     for (int i = 0; i < size; i++) {
         physicalAddress = Translate(NULL, (char*) va + i );  
-   //     printf(" physical %ld \n",physicalAddress);
-        //printf("After translate\n");
-      //  printf("PutVal:    %u\n", (char*)val+i);
-
         //setting value to a address(physicalAddress) 
         memcpy(physicalAddress, (char*)val+i, 1);
     }
+    pthread_mutex_unlock(&function_mutex);
 }
 
 
@@ -398,17 +426,14 @@ void GetVal(void *va, void *val, int size) {
     If you are implementing TLB,  always check first the presence of translation
     in TLB before proceeding forward */
 //    printf("Get value\n");
-
+    pthread_mutex_lock(&function_mutex);
     pte_t * physicalAddress;
     for (int i = 0; i < size; i++) {
-        physicalAddress = Translate(NULL, (char*) va + i);
- //       printf(" physical %ld \n",physicalAddress);
-        //printf("GetVal:    %u\n", (char*)val+i); 
-             
+        physicalAddress = Translate(NULL, (char*) va + i);        
         //setting value located at physicalAddress to val
         memcpy((char*)val+i, physicalAddress, 1);
     }
-    //printf("Get value done\n");
+     pthread_mutex_unlock(&function_mutex);
 }
 
 
@@ -425,6 +450,7 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
     load each element and perform multiplication. Take a look at test.c! In addition to
     getting the values from two matrices, you will perform multiplication and
     store the result to the "answer array"*/   
+      pthread_mutex_lock(&function_mutex);
       int x;
       int y;
       int sum;
@@ -443,10 +469,11 @@ void MatMult(void *mat1, void *mat2, int size, void *answer) {
                  address_mat2 = (unsigned int)mat2 + (k*size * sizeof(int))+(j* sizeof(int));
                  GetVal((void *)address_mat1, &x, sizeof(int));
                  GetVal((void *)address_mat2, &y, sizeof(int));
-		         sum+= (x * y);
+		 sum+= (x * y);
                }
             address_ans = (unsigned int) answer+(i*size * sizeof(int))+(j* sizeof(int));
             PutVal((void *)address_ans, &sum, sizeof(int)); 
             }
         }
+       pthread_mutex_unlock(&function_mutex);
 }
