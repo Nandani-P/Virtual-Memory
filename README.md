@@ -1,5 +1,5 @@
 # Virtual-Memory-Implementation
-# Author: Nandani Patidar & Sreeram 
+# Author: Nandani Patidar & Sreeram Maddineni
 
 The goal of this project is to implement “myalloc()” which will return a virtual address that maps to a physical page.
 Here, physical memory is a large region of contiguous memory which can be allocated using mmap() and malloc() 
