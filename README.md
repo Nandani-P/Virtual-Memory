@@ -17,12 +17,11 @@ Part 1 - Implementing a Virtual Memory System -
   6. PutVal() / GetVal()
   7. MatMul()
   
-Part 2 - Implementation of a TLB
-
-  Logic
-  Number of entries in TLB
-  TLB entry size
-  TLB Eviction
-  Expected Output
+Part 2 - Implementation of a TLB - 
+  1.Logic
+  2.Number of entries in TLB
+  3.TLB entry size
+  4.TLB Eviction
+  5.Expected Output
   
 Note: For detailed description please check Project Description - Virtual Menory Implementation file in the main folder.
