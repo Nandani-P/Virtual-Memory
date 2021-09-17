@@ -5,7 +5,9 @@ The goal of this project is to implement “myalloc()” which will return a vir
 Here, physical memory is a large region of contiguous memory which can be allocated using mmap() and malloc() 
 
 We have used 32-bit address space which can support up to 4GB of address space.
+
 Part 1 - Implementing a Virtual Memory System -
+
   The following are the APIs our library have:-
   1. SetPhysicalMem()
   2. Translate()
@@ -16,6 +18,7 @@ Part 1 - Implementing a Virtual Memory System -
   7. MatMul()
   
 Part 2 - Implementation of a TLB
+
   Logic
   Number of entries in TLB
   TLB entry size
