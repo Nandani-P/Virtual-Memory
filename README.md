@@ -18,6 +18,7 @@ Part 1 - Implementing a Virtual Memory System -
   7. MatMul()
   
 Part 2 - Implementation of a TLB - 
+
   1.Logic
   2.Number of entries in TLB
   3.TLB entry size
