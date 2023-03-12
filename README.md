@@ -1,4 +1,4 @@
-# Virtual-Memory-Implementation
+# User-Level Memory Management Library
 # Author: Nandani Patidar & Sreeram Maddineni
 
 The goal of this project is to implement “myalloc()” which will return a virtual address that maps to a physical page.
